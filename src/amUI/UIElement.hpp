@@ -9,15 +9,26 @@ class UIElement
 {
 public:
 	UIElement(
-		std::unique_ptr<ObjectType>&& object,
-		const float& scaleX = 1.f,
-		const float& scaleY = 1.f,
+		std::shared_ptr<ObjectType>& object,
 		const float& posX = 0.f,
-		const float& posY = 0.f)
+		const float& posY = 0.f,
+		const float& scaleX = 1.f,
+		const float& scaleY = 1.f)
 		: m_scaleX(scaleX), m_scaleY(scaleY), m_posX(posX), m_posY(posY)
 	{
-		m_modelMatrix = utils::Translate2d(200, 200) * utils::Scale2d(10, 10);
-		m_geometryObject = std::move(object);
+		m_modelMatrix = utils::Translate2d(m_posX, m_posY) * utils::Scale2d(m_scaleX, m_scaleY);
+		m_geometryObject = object;
+	}
+
+	UIElement(
+		std::shared_ptr<ObjectType>& object,
+		const float& posX = 0.f,
+		const float& posY = 0.f,
+		const float& uniformScaleFactor = 1.f)
+		: m_scaleX(uniformScaleFactor), m_scaleY(uniformScaleFactor), m_posX(posX), m_posY(posY)
+	{
+		m_modelMatrix = utils::Translate2d(m_posX, m_posY) * utils::Scale2d(m_scaleX, m_scaleY);
+		m_geometryObject = object;
 	}
 
 	void Update()
@@ -49,7 +60,7 @@ public:
 	}
 
 private:
-	std::unique_ptr<GeometryObject2d> m_geometryObject;
+	std::shared_ptr<ObjectType> m_geometryObject;
 
 	float m_scaleX;
 	float m_scaleY;

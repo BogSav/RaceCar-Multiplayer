@@ -31,6 +31,20 @@ public:
 			text, posX, /*m_window->GetResolution().y -*/ posY, scale, color());
 	}
 
+	glm::vec2 GetSizeOfText(const std::string& text, const float scale = 1.f) {
+		glm::vec2 test{-1, -1};
+		
+		for (auto c = text.cbegin(); c != text.cend(); c++)
+		{
+			gfxc::Character ch = m_textRenderer->Characters[*c];
+
+			test.x += ch.Size.x * scale;
+			test.y = ch.Size.y * scale;
+		}
+
+		return test;
+	}
+
 private:
 	gfxc::TextRenderer* const m_textRenderer;
 };

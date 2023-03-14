@@ -12,6 +12,8 @@
 class MainMenu : public gfxc::SimpleScene
 {
 public:
+	using RectangularButton = std::unique_ptr<PolygonUIElement>;
+
 	MainMenu();
 	~MainMenu() = default;
 
@@ -29,6 +31,14 @@ private:
 	void OnMouseBtnPress(int mouseX, int mouseY, int button, int mods) override;
 
 private:
+	enum class MenuStates
+	{
+		INITIAL_MENU = 0,
+		CHOSE_GAME_TYPE_MENU = 1,
+		SINGLE_OR_MULTI_PLAYER_SPECIFIC_MENU = 2
+	};
+
+private:
 	const utils::LogicSpace m_NDCSpace;
 	const utils::LogicSpace m_logicSpace;
 
@@ -37,9 +47,12 @@ private:
 
 	glm::mat3 m_logicToNDCSpaceMatrix;
 
-	std::unique_ptr<PolygonUIElement> m_optionsElement;
+	RectangularButton m_goBackButton;
+	RectangularButton m_goToChoseMenuButton;
 
 	std::unique_ptr<GeometryObject2d> test;
 
 	std::string teststring;
+
+	MenuStates m_currentMenuState;
 };
