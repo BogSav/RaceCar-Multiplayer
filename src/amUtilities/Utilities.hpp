@@ -88,7 +88,7 @@ inline float area(float x1, float y1, float x2, float y2, float x3, float y3)
 	return abs((x1 * (y2 - y3) + x2 * (y3 - y1) + x3 * (y1 - y2)) / 2.0f);
 }
 inline bool CheckIfPointIsInside(
-	const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3, const glm::vec2& pt, const float& tolerance = 1e-8f)
+	const glm::vec3& v1, const glm::vec3& v2, const glm::vec3& v3, const glm::vec2& pt, const float& tolerance = 1e-3f)
 {
 	float A = area(v1.x, v1.y, v2.x, v2.y, v3.x, v3.y);
 

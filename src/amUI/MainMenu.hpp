@@ -9,15 +9,20 @@
 
 #include "TextComponents/TextEngine.hpp"
 
+#include "amGame/GameSettings.hpp"
+
 class MainMenu : public gfxc::SimpleScene
 {
 public:
 	using RectangularButton = std::unique_ptr<PolygonUIElement>;
+	using GameMode = GameSettings::GameMode;
 
 	MainMenu();
 	~MainMenu() = default;
 
 	void Init() override;
+
+	GameSettings* GetGameSettings();
 
 private:
 	void FrameStart() override;
@@ -38,6 +43,9 @@ private:
 		SINGLE_OR_MULTI_PLAYER_SPECIFIC_MENU = 2
 	};
 
+	void IncrementMenuState();
+	void DecrementMenuState();
+
 private:
 	const utils::LogicSpace m_NDCSpace;
 	const utils::LogicSpace m_logicSpace;
@@ -47,12 +55,16 @@ private:
 
 	glm::mat3 m_logicToNDCSpaceMatrix;
 
+	// Butoanele
 	RectangularButton m_goBackButton;
 	RectangularButton m_goToChoseMenuButton;
+	RectangularButton m_singlePlayerChoseButton;
+	RectangularButton m_multiplayerChoseButton;
 
 	std::unique_ptr<GeometryObject2d> test;
 
 	std::string teststring;
 
 	MenuStates m_currentMenuState;
+	GameMode m_gameMode;
 };

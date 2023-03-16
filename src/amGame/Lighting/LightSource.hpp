@@ -6,7 +6,7 @@
 #include "Spot.hpp"
 #undef LIGHT
 
-#include "Game/Utilities/Colors.hpp"
+#include "amUtilities/Colors.hpp"
 
 class LightSourceAdapter
 {

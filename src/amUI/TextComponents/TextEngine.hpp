@@ -32,7 +32,7 @@ public:
 	}
 
 	glm::vec2 GetSizeOfText(const std::string& text, const float scale = 1.f) {
-		glm::vec2 test{-1, -1};
+		glm::vec2 test{0, 0};
 		
 		for (auto c = text.cbegin(); c != text.cend(); c++)
 		{

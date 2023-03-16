@@ -1,8 +1,10 @@
 #include "Track.hpp"
+#include "amUtilities/Utilities.hpp"
 
 #include <fstream>
 
 Track::Track(
+	const GameSettings* gameSettings,
 	const Shader* const shader,
 	CustomCamera* const camera,
 	const float& width,
@@ -10,7 +12,9 @@ Track::Track(
 	Color linesColor,
 	const float& scaleFactor,
 	std::string trackName)
-	: GameComponent(shader, camera),
+	: GameComponent(gameSettings),
+	  m_shader(shader),
+	  m_camera(camera),
 	  m_width(width),
 	  m_roadColor(roadColor),
 	  m_linesColor(linesColor),
@@ -33,7 +37,7 @@ void Track::InitTrack()
 void Track::ReadTrackPointsFromFile()
 {
 	std::string fileName = m_trackName + ".txt";
-	std::string path = PATH_JOIN(SOURCE_PATH::MainMenu, "Piste", fileName);
+	std::string path = PATH_JOIN(SOURCE_PATH::Game, "Piste", fileName);
 
 	std::ifstream inputf;
 

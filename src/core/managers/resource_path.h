@@ -17,4 +17,5 @@ namespace RESOURCE_PATH
 namespace SOURCE_PATH
 {
 const std::string CustomShaders = PATH_JOIN("src", "amCustomShaders");
+const std::string Game = PATH_JOIN("src", "amGame");
 }

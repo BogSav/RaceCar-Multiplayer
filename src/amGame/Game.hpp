@@ -1,18 +1,6 @@
 #pragma once
 
-#include "Utilities/Camera.hpp"
 #include "components/simple_scene.h"
-
-#include "Game/GameComponents/Tree.hpp"
-#include "Game/GameComponents/Track.hpp"
-#include "Game/GameComponents/Car.hpp"
-#include "Game/GameComponents/Field.hpp"
-
-#include "Game/Physics/Collision/CollisionEngine.hpp"
-#include "Game/Utilities/Utilities.hpp"
-
-#include "Game/Display/ScreenElements.hpp"
-#include "Game/Display/Minimap.hpp"
 
 class Game : public gfxc::SimpleScene
 {
@@ -46,14 +34,6 @@ private:
 	void CreateShaders();
 
 private:
-	std::vector<std::unique_ptr<GameComponent>> m_components;
-
-	std::shared_ptr<CustomCamera> m_camera;
-	std::unique_ptr<Car> m_car;
-
-	DTimer frametimer;
-	DTimer m_resetTimer;
-
 	size_t m_nrOfStreetLights;
 	size_t m_nrOfNPCs;
 	size_t m_nrOfTrees;
@@ -61,9 +41,6 @@ private:
 	float m_curveCoefficent;
 
 	glm::ivec2 m_resolution;
-
-	std::unique_ptr<ScreenElements> m_screen;
-	std::shared_ptr<MiniMap> m_minimap;
 
 	bool m_carReset;
 	bool m_frameTimer;

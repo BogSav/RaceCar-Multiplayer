@@ -27,7 +27,7 @@ namespace gfxc
 
      public:
         SimpleScene();
-        ~SimpleScene();
+        ~SimpleScene() override;
 
         bool ToggleGroundPlane();
         void ReloadShaders() const;

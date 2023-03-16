@@ -33,3 +33,5 @@ private:
 	glm::vec3 m_minCorner = glm::vec3{0, 0, 0};
 	glm::vec3 m_maxCorner = glm::vec3{0, 0, 0};
 };
+
+typedef BoundingBox BBox;

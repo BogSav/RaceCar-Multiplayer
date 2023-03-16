@@ -37,15 +37,58 @@ void MainMenu::Init()
 		m_shader->CreateAndLink();
 	}
 
-	std::shared_ptr<Polygon2d> defaultRectangle =
-		std::make_shared<Polygon2d>(glm::vec2{-1.f, -1.f}, 2.f, 2.f, Colors::Red, true);
-	m_goBackButton = std::make_unique<PolygonUIElement>(defaultRectangle, 150, 100, 50, 25);
-	m_goToChoseMenuButton = std::make_unique<PolygonUIElement>(
-		defaultRectangle, window->GetResolution().x / 2, window->GetResolution().y / 2, 100, 50);
+	// Creare butoane
+	{
+		std::shared_ptr<Polygon2d> defaultRectangle =
+			std::make_shared<Polygon2d>(glm::vec2{-1.f, -1.f}, 2.f, 2.f, Colors::Red, true);
 
-	m_currentMenuState = MenuStates::INITIAL_MENU;
+		m_goBackButton = std::make_unique<PolygonUIElement>(defaultRectangle, 150, 100, 50, 25);
+		m_goToChoseMenuButton = std::make_unique<PolygonUIElement>(
+			defaultRectangle,
+			window->GetResolution().x / 2.f,
+			window->GetResolution().y / 2.f,
+			100.f,
+			50.f);
+		m_singlePlayerChoseButton = std::make_unique<PolygonUIElement>(
+			defaultRectangle,
+			window->GetResolution().x / 12.f * 4.f,
+			window->GetResolution().y / 2.f,
+			100.f,
+			50.f);
+		m_multiplayerChoseButton = std::make_unique<PolygonUIElement>(
+			defaultRectangle,
+			window->GetResolution().x / 12.f * 8.f,
+			window->GetResolution().y / 2.f,
+			100.f,
+			50.f);
+	}
+
+	// Creare state menu si mod initial
+	{
+		m_currentMenuState = MenuStates::CHOSE_GAME_TYPE_MENU;
+		m_gameMode = GameMode::UNSELECTED;
+	}
 
 	// test = std::make_unique<Polygon2d>(glm::vec2{-1.f, -1.f}, 2.f, 2.f, Colors::Red);
+}
+
+GameSettings* MainMenu::GetGameSettings()
+{
+	GameSettings* gameSettings = new GameSettings();
+
+	// Momentan le lasam valori default pana sa puitem alege din UI parametrii
+	gameSettings->m_carParameters.InitComponentsWithDefaultValues();
+	gameSettings->m_physicsParameters.InitComponentsWithDefaultValues();
+	gameSettings->m_worldParameters.InitWorldParametersToDefaultValues();
+
+	gameSettings->m_isMultiplayer = m_gameMode == GameMode::MULTIPLAYER;
+	gameSettings->m_gameMode = m_gameMode;
+	gameSettings->m_nrOfPlayers = static_cast<int>(m_gameMode);
+
+	gameSettings->m_resolution = window->GetResolution();
+	gameSettings->m_frameTimerEnabled = false;
+
+	return gameSettings;
 }
 
 void MainMenu::FrameStart()
@@ -60,21 +103,33 @@ void MainMenu::Update(float deltaTime)
 
 void MainMenu::Render(float deltaTime)
 {
+	m_textEngine->Render("RaceCar Multiplayer", 330, 100, 3.f);
+
 	switch (m_currentMenuState)
 	{
 	case MenuStates::INITIAL_MENU:
 		m_goToChoseMenuButton->Render(m_shader, m_logicToNDCSpaceMatrix);
 		m_textEngine->Render(
 			"CHOSE GAME TYPE",
-			window->GetResolution().x / 2.f - 80,
+			window->GetResolution().x / 2.f - 83.f,
 			window->GetResolution().y / 2.f);
+
 		break;
 	case MenuStates::CHOSE_GAME_TYPE_MENU:
 		m_goBackButton->Render(m_shader, m_logicToNDCSpaceMatrix);
-		m_textEngine->Render("GO BACK", 150, 1000);
+		m_textEngine->Render("GO BACK", 110, 615);
+
+		m_singlePlayerChoseButton->Render(m_shader, m_logicToNDCSpaceMatrix);
+		m_textEngine->Render("SINGLEPLAYER", 360, 355);
+
+		m_multiplayerChoseButton->Render(m_shader, m_logicToNDCSpaceMatrix);
+		m_textEngine->Render("MULTIPLAYER", 790, 355);
+
 		break;
 	case MenuStates::SINGLE_OR_MULTI_PLAYER_SPECIFIC_MENU:
 		m_goBackButton->Render(m_shader, m_logicToNDCSpaceMatrix);
+		m_textEngine->Render("GO BACK", 110, 615);
+
 		break;
 	}
 }
@@ -96,17 +151,47 @@ void MainMenu::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 {
 	switch (m_currentMenuState)
 	{
-	case MenuStates::INITIAL_MENU: 
+	case MenuStates::INITIAL_MENU:
 		if (m_goToChoseMenuButton->HasBeenClicked(mouseX, window->GetResolution().y - mouseY))
-			m_currentMenuState = static_cast<MenuStates>(static_cast<int>(m_currentMenuState) + 1);
+			IncrementMenuState();
+
 		break;
 	case MenuStates::CHOSE_GAME_TYPE_MENU:
 		if (m_goBackButton->HasBeenClicked(mouseX, window->GetResolution().y - mouseY))
-			m_currentMenuState = static_cast<MenuStates>(static_cast<int>(m_currentMenuState) - 1);
+		{
+			DecrementMenuState();
+			m_gameMode = GameMode::UNSELECTED;
+		}
+
+		if (m_singlePlayerChoseButton->HasBeenClicked(mouseX, window->GetResolution().y - mouseY))
+		{
+			IncrementMenuState();
+			m_gameMode = GameMode::SINGLEPLAYER;
+		}
+
+		if (m_multiplayerChoseButton->HasBeenClicked(mouseX, window->GetResolution().y - mouseY))
+		{
+			IncrementMenuState();
+			m_gameMode = GameMode::MULTIPLAYER;
+
+			World::Exit();
+		}
+
 		break;
 	case MenuStates::SINGLE_OR_MULTI_PLAYER_SPECIFIC_MENU:
 		if (m_goBackButton->HasBeenClicked(mouseX, window->GetResolution().y - mouseY))
-			m_currentMenuState = static_cast<MenuStates>(static_cast<int>(m_currentMenuState) - 1);
+			DecrementMenuState();
+
 		break;
 	}
+}
+
+void MainMenu::IncrementMenuState()
+{
+	m_currentMenuState = static_cast<MenuStates>(static_cast<int>(m_currentMenuState) + 1);
+}
+
+void MainMenu::DecrementMenuState()
+{
+	m_currentMenuState = static_cast<MenuStates>(static_cast<int>(m_currentMenuState) - 1);
 }
