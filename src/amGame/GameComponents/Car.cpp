@@ -10,12 +10,12 @@ Car::Car(const GameSettings* gameSettings, const WindowObject* window, const Sha
 	m_mesh = std::make_unique<Mesh>();
 	m_mesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "mele"), "F1.obj");
 
-	m_position = {-10, -0.1, -40};
-	m_scale = {0.7, 0.7, 0.7};
-	m_direction = {1, 0, 0};
-	m_angleOrientation = 0;
+	m_position = {-10.f, -0.1f, -40.f};
+	m_scale = {0.7f, 0.7f, 0.7f};
+	m_direction = {1.f, 0.f, 0.f};
+	m_angleOrientation = 0.f;
 
-	this->UpdateOrientation(-1);
+	this->UpdateOrientation(-1.f);
 
 	m_camera->Set(
 		m_position - m_direction * (m_distanceFromCamera * 2.f),
@@ -25,7 +25,7 @@ Car::Car(const GameSettings* gameSettings, const WindowObject* window, const Sha
 	m_camera->TranslateUpward(m_distanceFromCamera);
 	m_camera->RotateFirstPerson_OX(RADIANS(-15));
 
-	m_gearBox = std::make_unique<CarComponents::GearBox>(gameSettings->m_carParameters);
+	m_gearBox = std::make_unique<CarComponents::GearBox>(gameSettings->GetCarParameters());
 	m_engine = std::make_unique<CarComponents::CarEngine>(*gameSettings, m_gearBox.get());
 
 	m_headLightLeft = std::make_unique<SpotLight>(

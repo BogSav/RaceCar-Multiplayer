@@ -30,15 +30,6 @@ public:
 			m_leftBulb.get(), m_rightBulb.get()};
 	}
 
-
-private:
-	StreetLight(
-		const Shader* const shader,
-		CustomCamera* const camera,
-		std::shared_ptr<Texture2D>& texture,
-		std::string meshPath,
-		std::string meshName);
-
 private:
 	std::shared_ptr<Texture2D> m_texture;
 	std::unique_ptr<GeometryObject3d> m_base;

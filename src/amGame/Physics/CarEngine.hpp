@@ -11,8 +11,8 @@ class CarEngine
 public:
 	CarEngine() = delete;
 	CarEngine(const GameSettings& gameSettings, GearBox* gearBox)
-		: m_physicsParameters(gameSettings.m_physicsParameters),
-		  m_carParameters(gameSettings.m_carParameters),
+		: m_physicsParameters(gameSettings.GetPhysicsParameters()),
+		  m_carParameters(gameSettings.GetCarParameters()),
 		  m_gearBox(gearBox){};
 
 	void Reset()

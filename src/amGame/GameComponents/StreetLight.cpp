@@ -39,7 +39,7 @@ void StreetLight::Render()
 	m_modelMatrix = glm::mat4(1);
 
 	m_modelMatrix = glm::translate(m_modelMatrix, m_position);
-	m_modelMatrix = glm::scale(m_modelMatrix, glm::vec3{m_scale, m_scale, m_scale});
+	m_modelMatrix = glm::scale(m_modelMatrix, m_scale);
 
 	glm::mat4 baseModelMatrix = glm::translate(m_modelMatrix, glm::vec3{0.f, 1.5f, 0.f});
 	baseModelMatrix = glm::scale(baseModelMatrix, glm::vec3{.1f, 3.f, .1f});
@@ -54,7 +54,7 @@ void StreetLight::Render()
 void StreetLight::InstantiateLightSources()
 {
 	m_leftBulb = std::make_unique<SpotLight>(
-		m_position + glm::vec3{1.3, 3.f, 0.f},
+		m_position + glm::vec3{1.3f, 3.f, 0.f},
 		Colors::White,
 		1.f,
 		RADIANS(30),

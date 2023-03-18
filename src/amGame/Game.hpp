@@ -1,19 +1,24 @@
 #pragma once
 
 #include "components/simple_scene.h"
+#include "amGame/GameSettings.hpp"
+
+#include "amGame/GameComponents/GameComponent.hpp"
+#include "amGame/GameComponents/TrackBuilder.hpp"
 
 class Game : public gfxc::SimpleScene
 {
 public:
-	Game();
+	Game() = delete;
+	Game(GameSettings* gameSettings);
 	~Game();
 
 	void Init() override;
 
 private:
 	void FrameStart() override;
-	void RenderAndUpdateGameComponents(float);
-	void Update(float deltaTimeSeconds) override;
+	void Render(float deltaTime) override;
+	void Update(float deltaTime) override;
 	void FrameEnd() override;
 
 	void OnInputUpdate(float deltaTime, int mods) override;
@@ -24,24 +29,17 @@ private:
 	void OnMouseBtnPress(int mouseX, int mouseY, int button, int mods) override;
 	void OnMouseBtnRelease(int mouseX, int mouseY, int button, int mods) override;
 
-	void RenderGameComponents();
-	void RenderMinimap();
-	void RenderScreenObjects();
-
-	void UpdateGameComponents(float);
-	void UpdateCar(float);
-
 	void CreateShaders();
+	void CreateTextures();
 
 private:
-	size_t m_nrOfStreetLights;
-	size_t m_nrOfNPCs;
-	size_t m_nrOfTrees;
+	GameSettings* m_gameSettings;
 
-	float m_curveCoefficent;
+	std::unordered_map<std::string, std::shared_ptr<Texture2D>> m_textures;
+	std::unordered_map<std::string, std::unique_ptr<Shader>> m_shaders;
 
-	glm::ivec2 m_resolution;
+	std::unique_ptr<CustomCamera> m_camera;
 
-	bool m_carReset;
-	bool m_frameTimer;
+	// Game Components
+	std::unique_ptr<Track> m_track;
 };

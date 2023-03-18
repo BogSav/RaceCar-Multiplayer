@@ -12,6 +12,10 @@
 #   include "amUI/MainMenu.hpp"
 #endif
 
+#if defined(GAME)
+#	include "amGame/Game.hpp"
+#endif
+
 #define _CRTDBG_MAP_ALLOC
 #include <cstdlib>
 #include <crtdbg.h>
@@ -30,33 +34,43 @@ std::string GetParentDir(const std::string &filePath)
 
 int main(int argc, char **argv)
 {
+	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
+	_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+	_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+	_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+	_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+
+	srand((unsigned int)time(NULL));
+
+	// Create a window property structure
+	WindowProperties wp;
+	wp.resolution = glm::ivec2(1280, 720);
+	wp.vSync = true;
+	wp.selfDir = GetParentDir(std::string(argv[0]));
+
+	// Init the Engine and create a new window with the defined properties
+	(void)Engine::Init(wp);
+
+	GameSettings* gameSettings = new GameSettings();
+
 	{
-		_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
-		_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
-		_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
-		_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
-		_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
-		_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
-		srand((unsigned int)time(NULL));
-
-		// Create a window property structure
-		WindowProperties wp;
-		wp.resolution = glm::ivec2(1280, 720);
-		wp.vSync = true;
-		wp.selfDir = GetParentDir(std::string(argv[0]));
-
-		// Init the Engine and create a new window with the defined properties
-		(void)Engine::Init(wp);
-
-		World* mainMenu = new MainMenu();
+		Scene* mainMenu = new MainMenu();
 		mainMenu->Init();
 		mainMenu->Run();
-
-		Engine::Exit();
-
-
-		_CrtDumpMemoryLeaks();
+		dynamic_cast<MainMenu*>(mainMenu)->UpdateGameSettings(gameSettings);
+		delete mainMenu;
 	}
+
+	{
+		Scene* game = new Game(gameSettings);
+		game->Init();
+		game->Run();
+	}
+
+	Engine::Exit();
+
+	//_CrtDumpMemoryLeaks();
 
     return 0;
 }

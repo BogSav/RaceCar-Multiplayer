@@ -21,7 +21,7 @@
 
 namespace gfxc
 {
-    class SimpleScene : public World
+    class SimpleScene : public Scene
     {
         friend class SceneInput;
 

@@ -5,7 +5,7 @@
 #include "components/transform.h"
 
 
-World::World()
+Scene::Scene()
 {
     previousTime = 0;
     elapsedTime = 0;
@@ -17,38 +17,43 @@ World::World()
 }
 
 
-void World::Run()
+void Scene::Run()
 {
     if (!window)
         return;
 
-    while (!window->ShouldClose())
+    while (!window->ShouldClose() && !shouldClose)
     {
         LoopUpdate();
     }
 }
 
 
-void World::Pause()
+void Scene::Pause()
 {
     paused = !paused;
 }
 
 
-void World::Exit()
+void Scene::Exit()
 {
     shouldClose = true;
     window->Close();
 }
 
+void Scene::CloseScene()
+{
+	shouldClose = true;
+}
 
-double World::GetLastFrameTime()
+
+double Scene::GetLastFrameTime()
 {
     return deltaTime;
 }
 
 
-void World::ComputeFrameDeltaTime()
+void Scene::ComputeFrameDeltaTime()
 {
     elapsedTime = Engine::GetElapsedTime();
     deltaTime = elapsedTime - previousTime;
@@ -56,7 +61,7 @@ void World::ComputeFrameDeltaTime()
 }
 
 
-void World::LoopUpdate()
+void Scene::LoopUpdate()
 {
     // Polls and buffers the events
     window->PollEvents();

@@ -98,7 +98,7 @@ inline bool CheckIfPointIsInside(
 
 	return abs(A - (A1 + A2 + A3)) < tolerance;
 }
-constexpr inline bool CheckIfPointIsInside(
+inline bool CheckIfPointIsInside(
 	const glm::vec3& v1,
 	const glm::vec3& v2,
 	const glm::vec3& v3,
@@ -116,6 +116,11 @@ inline glm::vec3 GetInterpolatedPoint(
 	const glm::vec3& v1, const glm::vec3& v2, const float interpolationPoint)
 {
 	return v1 + (v2 - v1) * interpolationPoint;
+}
+
+inline glm::vec3 ShiftPointInDirection(glm::vec3& point, const glm::vec3& direction, const float& distance)
+{
+	point = point + direction * distance;
 }
 
 // Transformare din sptiu din rhs in spatiul din lhs

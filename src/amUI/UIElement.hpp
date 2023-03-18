@@ -1,5 +1,6 @@
 #pragma once
 
+#include "BoundingBox2d.hpp"
 #include "amGeometry/2dGeometries/2dCircle.hpp"
 #include "amGeometry/2dGeometries/2dPolygon.hpp"
 #include "amGeometry/2dGeometries/2dSemiCircle.hpp"
@@ -18,6 +19,7 @@ public:
 	{
 		m_modelMatrix = utils::Translate2d(m_posX, m_posY) * utils::Scale2d(m_scaleX, m_scaleY);
 		m_geometryObject = object;
+		m_bbox.InitBBoxBasedOnMesh(object->GetMesh().get());
 	}
 
 	UIElement(
@@ -25,10 +27,8 @@ public:
 		const float& posX = 0.f,
 		const float& posY = 0.f,
 		const float& uniformScaleFactor = 1.f)
-		: m_scaleX(uniformScaleFactor), m_scaleY(uniformScaleFactor), m_posX(posX), m_posY(posY)
+		: UIElement(object, posX, posY, uniformScaleFactor, uniformScaleFactor)
 	{
-		m_modelMatrix = utils::Translate2d(m_posX, m_posY) * utils::Scale2d(m_scaleX, m_scaleY);
-		m_geometryObject = object;
 	}
 
 	void Update()
@@ -45,16 +45,7 @@ public:
 	{
 		if (std::is_same<ObjectType, Polygon2d>::value == true)
 		{
-			return utils::CheckIfPointIsInside(
-					   m_modelMatrix * m_geometryObject->GetMesh()->vertices[0].position,
-					   m_modelMatrix * m_geometryObject->GetMesh()->vertices[1].position,
-					   m_modelMatrix * m_geometryObject->GetMesh()->vertices[2].position,
-					   glm::vec2{mouseX, mouseY})
-				|| utils::CheckIfPointIsInside(
-					   m_modelMatrix * m_geometryObject->GetMesh()->vertices[2].position,
-					   m_modelMatrix * m_geometryObject->GetMesh()->vertices[3].position,
-					   m_modelMatrix * m_geometryObject->GetMesh()->vertices[0].position,
-					   glm::vec2{mouseX, mouseY});
+			return m_bbox.GetTranformedBBox(m_modelMatrix).IsInside(glm::vec2{mouseX, mouseY});
 		}
 		return false;
 	}
@@ -69,6 +60,8 @@ private:
 	float m_posY;
 
 	glm::mat3 m_modelMatrix;
+
+	BoundingBox2d m_bbox;
 };
 
 typedef UIElement<Polygon2d> PolygonUIElement;

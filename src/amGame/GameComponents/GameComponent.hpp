@@ -16,7 +16,7 @@ public:
 	virtual void Render() { return; };
 	virtual void Render(
 		const glm::vec3& eyePosition,
-		const std::vector<const class LightSourceAdapter*>& lightingComponents) const
+		const std::vector<const class LightSourceAdapter*>& lightingComponents)
 	{
 		return;
 	};

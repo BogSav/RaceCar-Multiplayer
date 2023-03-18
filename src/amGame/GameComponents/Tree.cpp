@@ -46,7 +46,7 @@ void Tree::Render()
 {
 	m_modelMatrix = glm::mat4(1);
 	m_modelMatrix = glm::translate(m_modelMatrix, m_position + glm::vec3{0, 0.7f, 0});
-	m_modelMatrix = glm::scale(m_modelMatrix, glm::vec3{m_scale, m_scale, m_scale});
+	m_modelMatrix = glm::scale(m_modelMatrix, m_scale);
 
 	glm::mat4 trunkModelMatrix = glm::scale(m_modelMatrix, glm::vec3{0.5f, 1.5f, 0.5f});
 	GeometryRenderer::Render(m_objects[0].get(), trunkModelMatrix, m_trunkTexture.get());
@@ -68,7 +68,7 @@ void Tree::Render(
 {
 	m_modelMatrix = glm::mat4(1);
 	m_modelMatrix = glm::translate(m_modelMatrix, m_position + glm::vec3{0, 0.7f, 0});
-	m_modelMatrix = glm::scale(m_modelMatrix, glm::vec3{m_scale, m_scale, m_scale});
+	m_modelMatrix = glm::scale(m_modelMatrix, m_scale);
 
 	glm::mat4 trunkModelMatrix = glm::scale(m_modelMatrix, glm::vec3{0.5f, 1.5f, 0.5f});
 	GeometryRenderer::Render(

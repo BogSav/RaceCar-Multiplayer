@@ -11,18 +11,18 @@
 
 #include "amGame/GameSettings.hpp"
 
-class MainMenu : public gfxc::SimpleScene
+class MainMenu : public Scene
 {
 public:
 	using RectangularButton = std::unique_ptr<PolygonUIElement>;
 	using GameMode = GameSettings::GameMode;
 
 	MainMenu();
-	~MainMenu() = default;
+	~MainMenu();
 
 	void Init() override;
 
-	GameSettings* GetGameSettings();
+	void UpdateGameSettings(GameSettings*);
 
 private:
 	void FrameStart() override;

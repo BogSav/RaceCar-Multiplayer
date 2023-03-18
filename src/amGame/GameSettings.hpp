@@ -5,6 +5,8 @@
 #include "utils/glm_utils.h"
 #include "utils/math_utils.h"
 
+#include "amUtilities/Colors.hpp"
+
 class GameSettings
 {
 public:
@@ -15,9 +17,10 @@ public:
 		MULTIPLAYER = 2
 	};
 
+public:
 	struct PhysicsParameters
 	{
-		void InitComponentsWithDefaultValues()
+		void InitParameters()
 		{
 			this->gravitationalAcceleration = 9.8052f;  // m/s^2
 
@@ -37,9 +40,23 @@ public:
 		float speedReductionScalingFcator = 0.f;
 	};
 
+	struct WorldParameters
+	{
+		void InitParameters()
+		{
+			m_nrOfStreetLights = 5;
+			m_nrOfTrees = 5;
+
+			// m_trackName = "MonacoF1";
+		}
+
+		size_t m_nrOfStreetLights = 0;
+		size_t m_nrOfTrees = 0;
+	};
+
 	struct CarParameters
 	{
-		void InitComponentsWithDefaultValues()
+		void InitParameters()
 		{
 			this->brakeFroce = 30000.f;
 			this->m_shiftingTime = 0.4f;
@@ -50,13 +67,13 @@ public:
 			this->dragCoefficient = 0.9f;  // Adimensional
 
 
-			this->m_gearForces = {0.f, 40000.f, 35000.f, 30000.f, 25000.f, 23000.f, 20000.f, 18000.f};  // Newtons
+			this->m_gearForces = {
+				0.f, 40000.f, 35000.f, 30000.f, 25000.f, 23000.f, 20000.f, 18000.f};  // Newtons
 			this->m_gearShiftLimits = {0.f, 20.f, 40.f, 55.f, 70.f, 85.f, 110.f, 200.f};  // m/s
 		}
 
 		std::vector<float> m_gearForces;
 		std::vector<float> m_gearShiftLimits;
-
 
 		float brakeFroce = 0.f;
 		float m_shiftingTime = 0.f;
@@ -67,45 +84,55 @@ public:
 		float frictionCoefficient = 0.f;
 	};
 
-	struct WorldParameters
+	struct TrackParaneters
 	{
-		void InitWorldParametersToDefaultValues()
+		void InitParameters()
 		{
-			m_nrOfStreetLights = 5;
-			m_nrOfTrees = 5;
-
 			m_trackName = "MonacoF1";
-		}
+			m_roadColor = Colors::Gray;
+			m_linesColor = Colors::White;
 
-		size_t m_nrOfStreetLights = 0;
-		size_t m_nrOfTrees = 0;
+			m_width = 20.f;
+			m_scaleFactor = 6.0f;
+		}
 
 		std::string m_trackName;
-	};
+		Color m_roadColor = Colors::Gray;
+		Color m_linesColor = Colors::White;
 
-	struct GraphicsParameters
-	{
-		void InitiGraphicsParameters()
-		{
-			m_increasedFieldTextureDensity = true;
-			m_useLighhting = true;
-		}
-
-		bool m_increasedFieldTextureDensity = false;
-		bool m_useLighhting = false;
+		float m_width = 20.f;
+		float m_scaleFactor = 6.0f;
 	};
 
 public:
-	GameMode m_gameMode;
+	const PhysicsParameters& GetPhysicsParameters() const { return (m_physicsParameters); }
+	const WorldParameters& GetWorldParameters() const { return (m_worldParameters); }
+	const CarParameters& GetCarParameters() const { return (m_carParameters); }
+	const TrackParaneters& GetTrackParameters() const { return (m_trackParemetrs); }
+
+	void InitParameters()
+	{
+		m_physicsParameters.InitParameters();
+		m_worldParameters.InitParameters();
+		
+		m_carParameters.InitParameters();
+		m_trackParemetrs.InitParameters();
+	}
+
+public:
+	GameMode m_gameMode = GameMode::UNSELECTED;
 	bool m_isMultiplayer;
-	size_t m_nrOfPlayers;
+	size_t m_nrOfPlayers = 0;
 
 	glm::ivec2 m_resolution;
 
 	bool m_frameTimerEnabled;
 
+private:
 	PhysicsParameters m_physicsParameters;
-	CarParameters m_carParameters;
 	WorldParameters m_worldParameters;
-	GraphicsParameters m_graphicsParameters;
+
+	// Game components parameters
+	CarParameters m_carParameters;
+	TrackParaneters m_trackParemetrs;
 };

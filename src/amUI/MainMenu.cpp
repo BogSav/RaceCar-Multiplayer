@@ -13,6 +13,11 @@ MainMenu::MainMenu()
 	m_textEngine = std::make_unique<TextEngine>(window);
 }
 
+MainMenu::~MainMenu()
+{
+	InputController::SetActive(false);
+}
+
 void MainMenu::Init()
 {
 	m_logicToNDCSpaceMatrix = utils::VisualizationTransf2d(m_logicSpace, m_NDCSpace);
@@ -65,21 +70,17 @@ void MainMenu::Init()
 
 	// Creare state menu si mod initial
 	{
-		m_currentMenuState = MenuStates::CHOSE_GAME_TYPE_MENU;
+		m_currentMenuState = MenuStates::INITIAL_MENU;
 		m_gameMode = GameMode::UNSELECTED;
 	}
 
 	// test = std::make_unique<Polygon2d>(glm::vec2{-1.f, -1.f}, 2.f, 2.f, Colors::Red);
 }
 
-GameSettings* MainMenu::GetGameSettings()
+void MainMenu::UpdateGameSettings(GameSettings* gameSettings)
 {
-	GameSettings* gameSettings = new GameSettings();
-
 	// Momentan le lasam valori default pana sa puitem alege din UI parametrii
-	gameSettings->m_carParameters.InitComponentsWithDefaultValues();
-	gameSettings->m_physicsParameters.InitComponentsWithDefaultValues();
-	gameSettings->m_worldParameters.InitWorldParametersToDefaultValues();
+	gameSettings->InitParameters();
 
 	gameSettings->m_isMultiplayer = m_gameMode == GameMode::MULTIPLAYER;
 	gameSettings->m_gameMode = m_gameMode;
@@ -87,8 +88,6 @@ GameSettings* MainMenu::GetGameSettings()
 
 	gameSettings->m_resolution = window->GetResolution();
 	gameSettings->m_frameTimerEnabled = false;
-
-	return gameSettings;
 }
 
 void MainMenu::FrameStart()
@@ -167,14 +166,13 @@ void MainMenu::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 		{
 			IncrementMenuState();
 			m_gameMode = GameMode::SINGLEPLAYER;
+			Scene::CloseScene();
 		}
 
 		if (m_multiplayerChoseButton->HasBeenClicked(mouseX, window->GetResolution().y - mouseY))
 		{
 			IncrementMenuState();
 			m_gameMode = GameMode::MULTIPLAYER;
-
-			World::Exit();
 		}
 
 		break;

@@ -3,11 +3,11 @@
 #include "window/input_controller.h"
 
 
-class World : public InputController
+class Scene : public InputController
 {
  public:
-    World();
-    virtual ~World() {}
+    Scene();
+    virtual ~Scene() {}
     virtual void Init() {}
     virtual void FrameStart() {}
 	virtual void Update(float deltaTime) {}
@@ -17,6 +17,7 @@ class World : public InputController
     void Run();
     void Pause();
     void Exit();
+	void CloseScene();
 
     double GetLastFrameTime();
 
