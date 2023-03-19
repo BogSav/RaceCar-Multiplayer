@@ -1,7 +1,7 @@
 #include "GeometryRenderer.hpp"
 
 #include "3dGeometries/3dGeometryObject.hpp"
-#include "amGame/Lighting/LightSource.hpp"
+#include "amGame/Lighting/LightSourceVector.hpp"
 
 void GeometryRenderer::Render(const GeometryObject3d* geometryObject, const glm::mat4& modelMatrix)
 {
@@ -16,7 +16,7 @@ void GeometryRenderer::Render(
 	const GeometryObject3d* geometryObject,
 	const glm::mat4& modelMatrix,
 	const glm::vec3& eyePosition,
-	const std::vector<const class LightSourceAdapter*>& lightingComponents)
+	const LightSourcesVector& lightingComponents)
 {
 	SendDataToShader(geometryObject, modelMatrix);
 
@@ -29,7 +29,7 @@ void GeometryRenderer::Render(
 	const GeometryObject3d* geometryObject,
 	const glm::mat4& modelMatrix,
 	const glm::vec3& eyePosition,
-	const std::vector<const class LightSourceAdapter*>& lightingComponents,
+	const LightSourcesVector& lightingComponents,
 	const Texture2D* texture)
 {
 	SendDataToShader(geometryObject, modelMatrix);
@@ -55,7 +55,7 @@ void GeometryRenderer::Render(
 	const GeometryObject3d* geometryObject,
 	const glm::mat4& modelMatrix,
 	const glm::vec3& eyePosition,
-	const std::vector<const class LightSourceAdapter*>& lightingComponents,
+	const LightSourcesVector& lightingComponents,
 	const Texture2D* texture,
 	glm::vec2 texturePosition)
 {
@@ -199,7 +199,7 @@ void GeometryRenderer::SendDataToShader(
 void GeometryRenderer::SendLightingDataToShader(
 	const GeometryObject3d* geometryObject,
 	const glm::vec3& eyePosition,
-	const std::vector<const LightSourceAdapter*>& lightingComponents)
+	const LightSourcesVector& lightingComponents)
 {
 	// Send the position of the camera
 	int location = glGetUniformLocation(geometryObject->m_shader->program, "eye_position");

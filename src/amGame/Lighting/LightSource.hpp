@@ -28,6 +28,8 @@ public:
 
 	virtual void SetPosition(const glm::vec3&) = 0; 
 
+	virtual ~LightSourceAdapter() {}
+
 public:
 	static constexpr unsigned int materialShiness = 20;
 

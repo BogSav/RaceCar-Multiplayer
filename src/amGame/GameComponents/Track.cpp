@@ -18,8 +18,12 @@ void Track::Render()
 
 void Track::Render(
 	const glm::vec3& eyePosition,
-	const std::vector<const class LightSourceAdapter*>& lightingComponents)
+	const LightSourcesVector& lightingComponents)
 {
+	for (auto& geometry : m_geometries)
+	{
+		GeometryRenderer::Render(geometry.get(), glm::mat4(1), eyePosition, lightingComponents);
+	}
 }
 
 void Track::Update(float deltaTime)

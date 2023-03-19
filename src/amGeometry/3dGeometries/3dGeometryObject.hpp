@@ -2,6 +2,7 @@
 
 #include "amGeometry/GeometryRenderer.hpp"
 #include "amGame/Physics/Collision/BoundingBox.hpp"
+#include "amGame/Lighting/LightSourceVector.hpp"
 
 class GeometryObject3d
 {

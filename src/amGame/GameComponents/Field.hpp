@@ -25,6 +25,12 @@ public:
 			GeometryRenderer::Render(geometry.get(), m_modelMatrix);
 	}
 
+	void Render(const glm::vec3& eyePosition, const LightSourcesVector& lightingComponents) override
+	{
+		for (auto& geometry : m_geometries)
+			GeometryRenderer::Render(geometry.get(), m_modelMatrix);
+	}
+
 private:
 	void IncreaseTextureDensity(const Shader* const shader, CustomCamera* const camera)
 	{

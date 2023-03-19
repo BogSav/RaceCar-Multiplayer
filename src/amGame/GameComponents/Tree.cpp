@@ -4,7 +4,6 @@ Tree::Tree(
 	const GameSettings* gameSettings,
 	const Shader* const shader,
 	CustomCamera* const camera,
-	const WindowObject* window,
 	std::shared_ptr<Texture2D>& crownTexture,
 	std::shared_ptr<Texture2D>& trunkTexture)
 	: Tree(
@@ -13,7 +12,7 @@ Tree::Tree(
 		camera,
 		crownTexture,
 		trunkTexture,
-		PATH_JOIN(window->props.selfDir, "assets", "models", "primitives"),
+		PATH_JOIN(Engine::GetWindow()->props.selfDir, "assets", "models", "primitives"),
 		"box.obj",
 		"cone.obj")
 {
@@ -40,6 +39,8 @@ Tree::Tree(
 
 	m_crownTexture = crownTexture;
 	m_trunkTexture = trunkTexture;
+
+	m_scale = glm::vec3{6.0f, 6.0f, 6.0f};
 }
 
 void Tree::Render()
@@ -62,9 +63,7 @@ void Tree::Render()
 	m_bbox += m_objects[2]->GetTranformedBBox(crownModelMatrix);
 }
 
-void Tree::Render(
-	const glm::vec3& eyePosition,
-	const std::vector<const class LightSourceAdapter*>& lightingComponents)
+void Tree::Render(const glm::vec3& eyePosition, const LightSourcesVector& lightingComponents)
 {
 	m_modelMatrix = glm::mat4(1);
 	m_modelMatrix = glm::translate(m_modelMatrix, m_position + glm::vec3{0, 0.7f, 0});

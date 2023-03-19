@@ -33,18 +33,18 @@ public:
 		const class GeometryObject3d* geometryObject,
 		const glm::mat4& modelMatrix,
 		const glm::vec3& eyePosition,
-		const std::vector<const class LightSourceAdapter*>& lightingComponents);
+		const class LightSourcesVector& lightingComponents);
 	static void Render(
 		const class GeometryObject3d* geometryObject,
 		const glm::mat4& modelMatrix,
 		const glm::vec3& eyePosition,
-		const std::vector<const class LightSourceAdapter*>& lightingComponents,
+		const class LightSourcesVector& lightingComponents,
 		const Texture2D* texture);
 	static void Render(
 		const class GeometryObject3d* geometryObject,
 		const glm::mat4& modelMatrix,
 		const glm::vec3& eyePosition,
-		const std::vector<const class LightSourceAdapter*>& lightingComponents,
+		const class LightSourcesVector& lightingComponents,
 		const Texture2D* texture,
 		glm::vec2 texturePosition);
 
@@ -67,5 +67,5 @@ private:
 	static void SendLightingDataToShader(
 		const class GeometryObject3d* geometryObject,
 		const glm::vec3& eyePosition,
-		const std::vector<const LightSourceAdapter*>& lightingComponents);
+		const class LightSourcesVector& lightingComponents);
 };

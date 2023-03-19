@@ -43,8 +43,8 @@ public:
 	{
 		void InitParameters()
 		{
-			m_nrOfStreetLights = 5;
-			m_nrOfTrees = 5;
+			m_nrOfStreetLights = 15;
+			m_nrOfTrees = 10;
 
 			// m_trackName = "MonacoF1";
 		}

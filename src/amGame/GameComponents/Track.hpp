@@ -13,8 +13,7 @@ public:
 
 	void Render() override;
 	void Render(
-		const glm::vec3& eyePosition,
-		const std::vector<const class LightSourceAdapter*>& lightingComponents) override;
+		const glm::vec3& eyePosition, const LightSourcesVector& lightingComponents) override;
 
 	void Update(float deltaTime) override;
 

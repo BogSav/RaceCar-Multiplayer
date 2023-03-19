@@ -29,7 +29,7 @@ StreetLight::StreetLight(
 	m_base = std::make_unique<GeometryObject3d>(shader, camera, meshPath, meshName);
 	m_head = std::make_unique<GeometryObject3d>(shader, camera, meshPath, meshName);
 
-	m_scale = glm::vec3{10.f, 10.f, 10.f};
+	m_scale = glm::vec3{6.f, 6.f, 6.f};
 
 	m_base->ComputeInitialBBox();
 	m_head->ComputeInitialBBox();
@@ -50,6 +50,25 @@ void StreetLight::Render()
 	glm::mat4 headModelMatrix = glm::translate(m_modelMatrix, glm::vec3{0., 3.f, 0.f});
 	headModelMatrix = glm::scale(headModelMatrix, glm::vec3{2.f, .1f, .25f});
 	GeometryRenderer::Render(m_head.get(), headModelMatrix, m_texture.get());
+}
+
+void StreetLight::Render(const glm::vec3& eyePosition, const LightSourcesVector& lightingComponents)
+{
+	m_modelMatrix = glm::mat4(1);
+
+	m_modelMatrix = glm::translate(m_modelMatrix, m_position);
+	m_modelMatrix = glm::scale(m_modelMatrix, m_scale);
+
+	glm::mat4 baseModelMatrix = glm::translate(m_modelMatrix, glm::vec3{0.f, 1.5f, 0.f});
+	baseModelMatrix = glm::scale(baseModelMatrix, glm::vec3{.1f, 3.f, .1f});
+	GeometryRenderer::Render(
+		m_base.get(), baseModelMatrix, eyePosition, lightingComponents, m_texture.get());
+	m_bbox = m_base->GetTranformedBBox(baseModelMatrix);
+
+	glm::mat4 headModelMatrix = glm::translate(m_modelMatrix, glm::vec3{0., 3.f, 0.f});
+	headModelMatrix = glm::scale(headModelMatrix, glm::vec3{2.f, .1f, .25f});
+	GeometryRenderer::Render(
+		m_head.get(), headModelMatrix, eyePosition, lightingComponents, m_texture.get());
 }
 
 void StreetLight::InstantiateLightSources()

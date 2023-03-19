@@ -50,7 +50,7 @@ struct GearBox
 		currentGear--;
 	};
 	int GetCurrentGear() const { return currentGear; }
-	double GetBrakeForce() const { return m_carParameters.brakeFroce; }
+	float GetBrakeForce() const { return m_carParameters.brakeFroce; }
 
 private:
 	int currentGear = 1;

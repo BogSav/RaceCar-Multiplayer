@@ -18,12 +18,12 @@ public:
 
 	void UpdateCurrentPositionOnTrack()
 	{
-		int startSearchPosition = m_currentPosition - m_searchPositionTrashHold;
+		int startSearchPosition = static_cast<int>(m_currentPosition - m_searchPositionTrashHold);
 		if (startSearchPosition < 0)
-			startSearchPosition = m_trackSize + startSearchPosition;
+			startSearchPosition = static_cast<int>(m_trackSize) + startSearchPosition;
 
 		float minDistance = std::numeric_limits<float>::max();
-		size_t minPosition = -1;
+		size_t minPosition = 0;
 
 		for (size_t i = static_cast<size_t>(startSearchPosition), counter = 0;
 			 counter <= 2 * m_searchPositionTrashHold + 1;
@@ -63,7 +63,7 @@ private:
 	void FindInitialPositionOnTrack()
 	{
 		float minDistance = std::numeric_limits<float>::max();
-		size_t minPosition = -1;
+		size_t minPosition = 0;
 
 		for (size_t i = 0; i < m_trackSize; i++)
 		{

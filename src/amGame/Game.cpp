@@ -39,17 +39,38 @@ void Game::Init()
 			m_gameSettings, m_shaders["SimpleShader"].get(), m_cameraAttachedToCar.get());
 	}
 
-	{
-		for (size_t i = 0; i < m_gameSettings->GetWorldParameters().m_nrOfStreetLights; i++)
-		{
-			StreetLight* streetLight = new StreetLight(
-				m_gameSettings, m_shaders["TextureShader"].get(), m_cameraAttachedToCar.get(), m_textures["Pillar"]);
-			streetLight->SetPosition(
-				PositionGenerator::GeneratePosition(m_gameSettings, m_track.get()));
-			streetLight->InstantiateLightSources();
+	m_lightSources.reserve(
+		m_gameSettings->GetWorldParameters().m_nrOfStreetLights * 2
+		+ m_gameSettings->GetWorldParameters().m_nrOfTrees);
 
-			m_streetLights.emplace_back(streetLight);
-		}
+	for (size_t i = 0; i < m_gameSettings->GetWorldParameters().m_nrOfStreetLights; i++)
+	{
+		StreetLight* streetLight = new StreetLight(
+			m_gameSettings,
+			m_shaders["TextureShader"].get(),
+			m_cameraAttachedToCar.get(),
+			m_textures["Pillar"]);
+		streetLight->SetPosition(
+			PositionGenerator::GeneratePosition(m_gameSettings, m_track.get(), true, i));
+		streetLight->InstantiateLightSources();
+		m_lightSources.push_back(streetLight->GetLightSources());
+
+		m_streetLights.emplace_back(streetLight);
+	}
+
+	for (size_t i = 0; i < m_gameSettings->GetWorldParameters().m_nrOfTrees; i++)
+	{
+		Tree* tree = new Tree(
+			m_gameSettings,
+			m_shaders["TextureShader"].get(),
+			m_cameraAttachedToCar.get(),
+			m_textures["Crown"],
+			m_textures["Trunk"]);
+		tree->SetPosition(PositionGenerator::GeneratePosition(m_gameSettings, m_track.get()));
+		tree->InstantiateLightSource();
+		m_lightSources.push_back(tree->GetLightSoruce());
+
+		m_trees.emplace_back(tree);
 	}
 }
 
@@ -73,7 +94,12 @@ void Game::Render(float deltaTime)
 		streetLight->Render();
 	}
 
-	if (m_gameSettings->m_frameTimerEnabled && frameTimer.PassedTime(0.1))
+	for (auto& tree : m_trees)
+	{
+		tree->Render();
+	}
+
+	if (m_gameSettings->m_frameTimerEnabled && frameTimer.PassedTime(0.1f))
 		std::cout << 1.f / deltaTime << std::endl;
 }
 
@@ -128,7 +154,7 @@ void Game::OnInputUpdate(float deltaTime, int mods)
 		{
 			// if (m_cameraAttachedToCar->GetFov() < RADIANS(85))
 			//	m_cameraAttachedToCar->SetFov(m_cameraAttachedToCar->GetFov() + deltaTime *
-			//RADIANS(5));
+			// RADIANS(5));
 			m_car->Accelerate();
 		}
 		else if (window->KeyHold(GLFW_KEY_S))

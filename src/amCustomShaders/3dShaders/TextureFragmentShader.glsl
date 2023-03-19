@@ -1,6 +1,6 @@
 #version 330
 
-#define MAX_LIGHTS 30
+#define MAX_LIGHTS 100
 
 // Input
 in vec2 texcoord;
@@ -63,71 +63,71 @@ void main()
     vec3 semiFinalColor = vec3(0);
     vec3 culoareObiect = vec3(0);
 
-    for(int i = 0; i < nrOfLightSources; i++)
-    {
-        vec3 diffuse_light = vec3(0);
-        vec3 specular_light = vec3(0);
+//    for(int i = 0; i < nrOfLightSources; i++)
+//    {
+//        vec3 diffuse_light = vec3(0);
+//        vec3 specular_light = vec3(0);
+//
+//        vec3 N = normalize( world_normal );
+//        vec3 L = normalize( LightSources[i].position - world_position );
+//        vec3 V = normalize( eye_position - world_position );
+//        vec3 H = normalize( L + V );
+//
+//        float factorAtenuare = 1;
+//
+//        switch(LightSources[i].type)
+//        {
+//        // Calculations for directional light
+//        case 1:
+//            L = LightSources[i].direction;
+//            H = normalize( L + V );
+//
+//            diffuse_light = material_kd * LightSources[i].color * abs(dot(N, L));
+//            if (dot(N, L) > 0)
+//            {
+//                specular_light = material_ks * LightSources[i].color * pow(max(dot(N, H), 0), material_shininess);
+//            }
+//            break;
+//
+//        // Calculations for the spot light
+//        case 2:
+//            float spot_light = dot(-L, LightSources[i].direction);
+//            float spot_light_limit = cos(LightSources[i].cutOff);
+//
+//            if(spot_light > cos(LightSources[i].cutOff))
+//            {
+//                float linear_att = (spot_light - spot_light_limit) / (1.0f - spot_light_limit);
+//                factorAtenuare = pow(linear_att, 2);
+//                factorAtenuare *= 1 / (0.1 * pow(distance(world_position, LightSources[i].position), 2) + 1);
+//
+//                diffuse_light = material_kd * LightSources[i].color * max(dot(N, L), 0);
+//                if (dot(N, L) > 0)
+//                {
+//                    specular_light = material_ks * LightSources[i].color * pow(max(dot(N, H), 0), material_shininess);
+//                }
+//            }
+//            break;
+//
+//        // Calculations for the point light
+//        case 3:
+//            diffuse_light = material_kd * LightSources[i].color * max(dot(N, L), 0);
+//            if (dot(N, L) > 0)
+//            {
+//                specular_light = material_ks * LightSources[i].color * pow(max(dot(N, H), 0), material_shininess);
+//            }
+//            factorAtenuare = 1 / (0.1 * pow(distance(world_position, LightSources[i].position), 2) + 1);
+//            break;
+//
+//        // Cazul default
+//         default:
+//            factorAtenuare = 0;
+//            break;
+//        }
+//        semiFinalColor += factorAtenuare * ( diffuse_light + specular_light ) * LightSources[i].intensity;
+//    }
+//
+//    culoareObiect = finalColor.xyz * (ambient_light + semiFinalColor);
 
-        vec3 N = normalize( world_normal );
-        vec3 L = normalize( LightSources[i].position - world_position );
-        vec3 V = normalize( eye_position - world_position );
-        vec3 H = normalize( L + V );
-
-        float factorAtenuare = 1;
-
-        switch(LightSources[i].type)
-        {
-        // Calculations for directional light
-        case 1:
-            L = LightSources[i].direction;
-            H = normalize( L + V );
-
-            diffuse_light = material_kd * LightSources[i].color * abs(dot(N, L));
-            if (dot(N, L) > 0)
-            {
-                specular_light = material_ks * LightSources[i].color * pow(max(dot(N, H), 0), material_shininess);
-            }
-            break;
-
-        // Calculations for the spot light
-        case 2:
-            float spot_light = dot(-L, LightSources[i].direction);
-            float spot_light_limit = cos(LightSources[i].cutOff);
-
-            if(spot_light > cos(LightSources[i].cutOff))
-            {
-                float linear_att = (spot_light - spot_light_limit) / (1.0f - spot_light_limit);
-                factorAtenuare = pow(linear_att, 2);
-                factorAtenuare *= 1 / (0.1 * pow(distance(world_position, LightSources[i].position), 2) + 1);
-
-                diffuse_light = material_kd * LightSources[i].color * max(dot(N, L), 0);
-                if (dot(N, L) > 0)
-                {
-                    specular_light = material_ks * LightSources[i].color * pow(max(dot(N, H), 0), material_shininess);
-                }
-            }
-            break;
-
-        // Calculations for the point light
-        case 3:
-            diffuse_light = material_kd * LightSources[i].color * max(dot(N, L), 0);
-            if (dot(N, L) > 0)
-            {
-                specular_light = material_ks * LightSources[i].color * pow(max(dot(N, H), 0), material_shininess);
-            }
-            factorAtenuare = 1 / (0.1 * pow(distance(world_position, LightSources[i].position), 2) + 1);
-            break;
-
-        // Cazul default
-         default:
-            factorAtenuare = 0;
-            break;
-        }
-        semiFinalColor += factorAtenuare * ( diffuse_light + specular_light ) * LightSources[i].intensity;
-    }
-
-    culoareObiect = finalColor.xyz * (ambient_light + semiFinalColor);
-
-    out_color = vec4(culoareObiect.xyz, 1);
+    out_color = vec4(finalColor.xyz, 1);
 
 }

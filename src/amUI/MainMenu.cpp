@@ -47,7 +47,7 @@ void MainMenu::Init()
 		std::shared_ptr<Polygon2d> defaultRectangle =
 			std::make_shared<Polygon2d>(glm::vec2{-1.f, -1.f}, 2.f, 2.f, Colors::Red, true);
 
-		m_goBackButton = std::make_unique<PolygonUIElement>(defaultRectangle, 150, 100, 50, 25);
+		m_goBackButton = std::make_unique<PolygonUIElement>(defaultRectangle, 150.f, 100.f, 50.f, 25.f);
 		m_goToChoseMenuButton = std::make_unique<PolygonUIElement>(
 			defaultRectangle,
 			window->GetResolution().x / 2.f,
@@ -56,13 +56,13 @@ void MainMenu::Init()
 			50.f);
 		m_singlePlayerChoseButton = std::make_unique<PolygonUIElement>(
 			defaultRectangle,
-			window->GetResolution().x / 12.f * 4.f,
+			window->GetResolution().x / 15.f * 6.f,
 			window->GetResolution().y / 2.f,
 			100.f,
 			50.f);
 		m_multiplayerChoseButton = std::make_unique<PolygonUIElement>(
 			defaultRectangle,
-			window->GetResolution().x / 12.f * 8.f,
+			window->GetResolution().x / 15.f * 9.f,
 			window->GetResolution().y / 2.f,
 			100.f,
 			50.f);
@@ -151,25 +151,29 @@ void MainMenu::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 	switch (m_currentMenuState)
 	{
 	case MenuStates::INITIAL_MENU:
-		if (m_goToChoseMenuButton->HasBeenClicked(mouseX, window->GetResolution().y - mouseY))
+		if (m_goToChoseMenuButton->HasBeenClicked(
+				static_cast<float>(mouseX), static_cast<float>(window->GetResolution().y - mouseY)))
 			IncrementMenuState();
 
 		break;
 	case MenuStates::CHOSE_GAME_TYPE_MENU:
-		if (m_goBackButton->HasBeenClicked(mouseX, window->GetResolution().y - mouseY))
+		if (m_goBackButton->HasBeenClicked(
+				static_cast<float>(mouseX), static_cast<float>(window->GetResolution().y - mouseY)))
 		{
 			DecrementMenuState();
 			m_gameMode = GameMode::UNSELECTED;
 		}
 
-		if (m_singlePlayerChoseButton->HasBeenClicked(mouseX, window->GetResolution().y - mouseY))
+		if (m_singlePlayerChoseButton->HasBeenClicked(
+				static_cast<float>(mouseX), static_cast<float>(window->GetResolution().y - mouseY)))
 		{
 			IncrementMenuState();
 			m_gameMode = GameMode::SINGLEPLAYER;
 			Scene::CloseScene();
 		}
 
-		if (m_multiplayerChoseButton->HasBeenClicked(mouseX, window->GetResolution().y - mouseY))
+		if (m_multiplayerChoseButton->HasBeenClicked(
+				static_cast<float>(mouseX), static_cast<float>(window->GetResolution().y - mouseY)))
 		{
 			IncrementMenuState();
 			m_gameMode = GameMode::MULTIPLAYER;
@@ -177,7 +181,8 @@ void MainMenu::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 
 		break;
 	case MenuStates::SINGLE_OR_MULTI_PLAYER_SPECIFIC_MENU:
-		if (m_goBackButton->HasBeenClicked(mouseX, window->GetResolution().y - mouseY))
+		if (m_goBackButton->HasBeenClicked(
+				static_cast<float>(mouseX), static_cast<float>(window->GetResolution().y - mouseY)))
 			DecrementMenuState();
 
 		break;

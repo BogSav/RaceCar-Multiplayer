@@ -10,7 +10,7 @@
 
 #define MAX_2D_TEXTURES        (16)
 #define INVALID_LOC            (-1)
-#define MAX_LIGHTING_SOURCES   (20)
+#define MAX_LIGHTING_SOURCES   (100)
 
 
 class Shader

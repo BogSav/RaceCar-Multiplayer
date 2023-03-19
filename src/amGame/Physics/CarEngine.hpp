@@ -18,9 +18,9 @@ public:
 	void Reset()
 	{
 		m_gearBox->Reset();
-		v1 = 0;
-		v2 = 0;
-		F1 = 0;
+		v1 = 0.f;
+		v2 = 0.f;
+		F1 = 0.f;
 	}
 
 	void Accelerate()
@@ -80,7 +80,7 @@ public:
 	int GetCurrentGear() const { return m_gearBox->GetCurrentGear(); }
 
 	float GetSpeedMps() const { return v1; }
-	float GetSpeedKmh() const { return v1 * 3.6; }
+	float GetSpeedKmh() const { return v1 * 3.6f; }
 
 private:
 	float ComputeResultantForce(const glm::vec3& carDirection) const
@@ -103,8 +103,8 @@ private:
 	}
 	float ComputeAirResistenForce(const glm::vec3& carDirection) const
 	{
-		return 0.5 * m_carParameters.dragCoefficient * m_carParameters.frontalArea
-			* m_physicsParameters.airDensity * glm::pow(ComputeRelativeSpeed(carDirection), 2);
+		return 0.5f * m_carParameters.dragCoefficient * m_carParameters.frontalArea
+			* m_physicsParameters.airDensity * glm::pow(ComputeRelativeSpeed(carDirection), 2.f);
 	}
 
 	bool UpdateSpeed(const glm::vec3& carDirection, float deltaTime)
@@ -120,10 +120,10 @@ private:
 	}
 
 private:
-	float v1 = 0;
-	float v2 = 0;
+	float v1 = 0.f;
+	float v2 = 0.f;
 
-	float F1 = 0;
+	float F1 = 0.f;
 
 	GearBox* m_gearBox;
 	const GameSettings::PhysicsParameters& m_physicsParameters;

@@ -1,7 +1,6 @@
 #pragma once
 
 #include "amGame/GameSettings.hpp"
-#include "amGame/Lighting/LightSource.hpp"
 #include "amGeometry/3dGeometries/3dGeometriesIncludes.hpp"
 
 class GameComponent
@@ -14,12 +13,10 @@ public:
 	virtual void Update(float) { return; }
 
 	virtual void Render() { return; };
-	virtual void Render(
-		const glm::vec3& eyePosition,
-		const std::vector<const class LightSourceAdapter*>& lightingComponents)
+	virtual void Render(const glm::vec3& eyePosition, const LightSourcesVector& lightingComponents)
 	{
 		return;
-	};
+	}
 
 	BoundingBox GetBBox() const { return m_bbox; }
 	glm::vec3 GetPosition() const { return m_position; }

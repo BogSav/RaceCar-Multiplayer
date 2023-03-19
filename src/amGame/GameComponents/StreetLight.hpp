@@ -20,6 +20,8 @@ public:
 		std::string meshName);
 
 	void Render() override;
+	void Render(
+		const glm::vec3& eyePosition, const LightSourcesVector& lightingComponents) override;
 
 	void InstantiateLightSources();
 

@@ -9,6 +9,9 @@
 #include "amGame/GameComponents/Field.hpp"
 #include "amGame/GameComponents/PlaceTracker.hpp"
 #include "amGame/GameComponents/StreetLight.hpp"
+#include "amGame/GameComponents/Tree.hpp"
+
+#include "amGame/Lighting/LightSourceVector.hpp"
 
 class Game : public gfxc::SimpleScene
 {
@@ -45,11 +48,14 @@ private:
 	std::unique_ptr<CustomCamera> m_camera;
 	std::shared_ptr<CustomCamera> m_cameraAttachedToCar;
 
+	LightSourcesVector m_lightSources;
+
 	// Game Components
 	std::unique_ptr<Track> m_track;
 	std::unique_ptr<Car> m_car;
 	std::unique_ptr<Field> m_field;
 	std::vector<std::unique_ptr<StreetLight>> m_streetLights;
+	std::vector<std::unique_ptr<Tree>> m_trees;
 
 	FTimer frameTimer;
 };
