@@ -1,11 +1,10 @@
 #pragma once
 
+#include "amUtilities/Colors.hpp"
 #include "components/simple_scene.h"
 #include "core/engine.h"
 #include "utils/glm_utils.h"
 #include "utils/math_utils.h"
-
-#include "amUtilities/Colors.hpp"
 
 class GameSettings
 {
@@ -100,8 +99,30 @@ public:
 		Color m_roadColor = Colors::Gray;
 		Color m_linesColor = Colors::White;
 
-		float m_width = 20.f;
-		float m_scaleFactor = 6.0f;
+		float m_width = 0.f;
+		float m_scaleFactor = 0.f;
+	};
+
+	struct FieldParameters
+	{
+		void InitParameters()
+		{
+			startPos = glm::vec3{-480.f, 0.f, -350.f};
+			width = 930.f;
+			length = 600.f;
+			ozTriangleDensity = 20;
+			oxTrianglreDensity = 20;
+			increaseTextureDensity = true;
+			color = Colors::DarkGreen;
+		}
+
+		glm::vec3 startPos;
+		float width = 0.f;
+		float length = 0.f;
+		size_t ozTriangleDensity = 0;
+		size_t oxTrianglreDensity = 0;
+		bool increaseTextureDensity = false;
+		Color color;
 	};
 
 public:
@@ -109,14 +130,16 @@ public:
 	const WorldParameters& GetWorldParameters() const { return (m_worldParameters); }
 	const CarParameters& GetCarParameters() const { return (m_carParameters); }
 	const TrackParaneters& GetTrackParameters() const { return (m_trackParemetrs); }
+	const FieldParameters& GetFieldParameters() const { return m_fieldParameters; }
 
 	void InitParameters()
 	{
 		m_physicsParameters.InitParameters();
 		m_worldParameters.InitParameters();
-		
+
 		m_carParameters.InitParameters();
 		m_trackParemetrs.InitParameters();
+		m_fieldParameters.InitParameters();
 	}
 
 public:
@@ -135,4 +158,5 @@ private:
 	// Game components parameters
 	CarParameters m_carParameters;
 	TrackParaneters m_trackParemetrs;
+	FieldParameters m_fieldParameters;
 };

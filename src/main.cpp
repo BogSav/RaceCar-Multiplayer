@@ -1,38 +1,38 @@
+#include "components/simple_scene.h"
+#include "core/engine.h"
+
 #include <ctime>
 #include <iostream>
 
-#include "core/engine.h"
-#include "components/simple_scene.h"
-
-//#if defined(GAME)
-//#   include "Game/Game.hpp"
-//#endif
+// #if defined(GAME)
+// #   include "Game/Game.hpp"
+// #endif
 
 #if defined(UI)
-#   include "amUI/MainMenu.hpp"
+#include "amUI/MainMenu.hpp"
 #endif
 
 #if defined(GAME)
-#	include "amGame/Game.hpp"
+#include "amGame/Game.hpp"
 #endif
 
 #define _CRTDBG_MAP_ALLOC
-#include <cstdlib>
 #include <crtdbg.h>
+#include <cstdlib>
 
 #ifdef _WIN32
-    PREFER_DISCRETE_GPU_NVIDIA;
-    PREFER_DISCRETE_GPU_AMD;
+PREFER_DISCRETE_GPU_NVIDIA;
+PREFER_DISCRETE_GPU_AMD;
 #endif
 
 
-std::string GetParentDir(const std::string &filePath)
+std::string GetParentDir(const std::string& filePath)
 {
-    size_t pos = filePath.find_last_of("\\/");
-    return (std::string::npos == pos) ? "." : filePath.substr(0, pos);
+	size_t pos = filePath.find_last_of("\\/");
+	return (std::string::npos == pos) ? "." : filePath.substr(0, pos);
 }
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
 	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
 	_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
@@ -72,5 +72,5 @@ int main(int argc, char **argv)
 
 	//_CrtDumpMemoryLeaks();
 
-    return 0;
+	return 0;
 }

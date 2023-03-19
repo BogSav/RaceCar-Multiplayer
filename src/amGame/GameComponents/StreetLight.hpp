@@ -1,6 +1,6 @@
 #pragma once
 
-#include "GameComponent.hpp"
+#include "GameComponentPositionGenerator.hpp"
 
 class StreetLight : public GameComponent
 {
@@ -9,7 +9,6 @@ public:
 		const GameSettings* gameSettings,
 		const Shader* const shader,
 		CustomCamera* const camera,
-		const WindowObject* window,
 		std::shared_ptr<Texture2D>& texture);
 
 	StreetLight(
@@ -24,11 +23,7 @@ public:
 
 	void InstantiateLightSources();
 
-	std::pair<const LightSourceAdapter*, const LightSourceAdapter*> GetLightSources() const
-	{
-		return std::pair<const LightSourceAdapter*, const LightSourceAdapter*>{
-			m_leftBulb.get(), m_rightBulb.get()};
-	}
+	std::pair<const LightSourceAdapter*, const LightSourceAdapter*> GetLightSources() const;
 
 private:
 	std::shared_ptr<Texture2D> m_texture;

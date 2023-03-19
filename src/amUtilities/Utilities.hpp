@@ -117,7 +117,6 @@ inline glm::vec3 GetInterpolatedPoint(
 {
 	return v1 + (v2 - v1) * interpolationPoint;
 }
-
 inline glm::vec3 ShiftPointInDirection(glm::vec3& point, const glm::vec3& direction, const float& distance)
 {
 	point = point + direction * distance;

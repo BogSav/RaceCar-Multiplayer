@@ -40,6 +40,8 @@ public:
 		this->bottomOrttho = bottom;
 		this->topOrtho = top;
 
+		this->m_aspectRatio = aspectRatio;
+
 		if (isOrthoGraphic)
 			this->projectionMatrix =
 				glm::ortho(leftOrtho, rightOrtho, bottomOrttho, topOrtho, m_zNear, m_Zfar);
@@ -140,11 +142,17 @@ public:
 	}
 
 	// Getters for components
+	float GetFov() const { return m_fov; }
 	glm::mat4 GetViewMatrix() const { return glm::lookAt(position, position + forward, up); }
 	glm::mat4 GetProjectionMatrix() const { return this->projectionMatrix; }
-
 	glm::vec3 GetTargetPosition() const { return position + forward * distanceToTarget; }
 	glm::vec3& GetPosition() { return position; };
+
+	void SetFov(float newValue)
+	{
+		m_fov = newValue;
+		this->projectionMatrix = glm::perspective(m_fov, m_aspectRatio, m_zNear, m_Zfar);
+	}
 
 private:
 	float distanceToTarget = 0.f;
@@ -158,6 +166,7 @@ private:
 	float m_fov = RADIANS(60);
 	float m_zNear = 0.1f;
 	float m_Zfar = 500.f;
+	float m_aspectRatio;
 
 	float leftOrtho = 0.f;
 	float rightOrtho = 0.f;

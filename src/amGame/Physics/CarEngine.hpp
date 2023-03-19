@@ -69,9 +69,8 @@ public:
 			return currentPosition;
 
 		glm::vec3 newPosition = currentPosition
-			+ carDirection
-				* static_cast<float>(
-					(v1 + v2) * deltaTime / 2 / m_physicsParameters.speedReductionScalingFcator);
+			+ carDirection * (v1 + v2) * deltaTime / 2.f
+				/ m_physicsParameters.speedReductionScalingFcator;
 
 		v1 = v2;
 

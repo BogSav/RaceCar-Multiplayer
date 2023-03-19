@@ -4,14 +4,13 @@ StreetLight::StreetLight(
 	const GameSettings* gameSettings,
 	const Shader* const shader,
 	CustomCamera* const camera,
-	const WindowObject* window,
 	std::shared_ptr<Texture2D>& texture)
 	: StreetLight(
 		gameSettings,
 		shader,
 		camera,
 		texture,
-		PATH_JOIN(window->props.selfDir, "assets", "models", "primitives"),
+		PATH_JOIN(Engine::GetWindow()->props.selfDir, "assets", "models", "primitives"),
 		"box.obj")
 {
 }
@@ -29,6 +28,8 @@ StreetLight::StreetLight(
 
 	m_base = std::make_unique<GeometryObject3d>(shader, camera, meshPath, meshName);
 	m_head = std::make_unique<GeometryObject3d>(shader, camera, meshPath, meshName);
+
+	m_scale = glm::vec3{10.f, 10.f, 10.f};
 
 	m_base->ComputeInitialBBox();
 	m_head->ComputeInitialBBox();
@@ -67,4 +68,12 @@ void StreetLight::InstantiateLightSources()
 		RADIANS(30),
 		glm::vec3{0, -1, 0},
 		glm::vec3{-1, 0, 0});
+}
+
+std::pair<const LightSourceAdapter*, const LightSourceAdapter*> StreetLight::GetLightSources() const
+{
+	{
+		return std::pair<const LightSourceAdapter*, const LightSourceAdapter*>{
+			m_leftBulb.get(), m_rightBulb.get()};
+	}
 }

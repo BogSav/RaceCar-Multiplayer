@@ -1,14 +1,20 @@
 #include "Car.hpp"
 
+#include "PlaceTracker.hpp"
+
 #include <iostream>
 
-Car::Car(const GameSettings* gameSettings, const WindowObject* window, const Shader* const shader)
-	: BaseCar(gameSettings, shader, std::make_shared<CustomCamera>()),
+Car::Car(
+	const GameSettings* gameSettings,
+	const Shader* const shader,
+	std::shared_ptr<CustomCamera> camera)
+	: BaseCar(gameSettings, shader, camera),
 	  m_distanceFromCamera(6.f),
 	  m_stirringAngularSpeed(RADIANS(45.f))
 {
 	m_mesh = std::make_unique<Mesh>();
-	m_mesh->LoadMesh(PATH_JOIN(window->props.selfDir, RESOURCE_PATH::MODELS, "mele"), "F1.obj");
+	m_mesh->LoadMesh(
+		PATH_JOIN(Engine::GetWindow()->props.selfDir, RESOURCE_PATH::MODELS, "mele"), "F1.obj");
 
 	m_position = {-10.f, -0.1f, -40.f};
 	m_scale = {0.7f, 0.7f, 0.7f};
@@ -21,7 +27,7 @@ Car::Car(const GameSettings* gameSettings, const WindowObject* window, const Sha
 		m_position - m_direction * (m_distanceFromCamera * 2.f),
 		m_position,
 		glm::vec3{0, 1, 0},
-		window->props.aspectRatio);
+		Engine::GetWindow()->props.aspectRatio);
 	m_camera->TranslateUpward(m_distanceFromCamera);
 	m_camera->RotateFirstPerson_OX(RADIANS(-15));
 
@@ -68,7 +74,7 @@ void Car::Update(float deltaTime)
 	m_camera->MoveForward(glm::l2Norm(newPosition - m_position));
 	m_position = newPosition;
 
-	this->ComputeModelMatrix();
+	ComputeModelMatrix();
 
 	m_headLightLeft->SetDirection(m_direction + glm::vec3(0, -0.07, 0));
 	m_headLightLeft->SetPosition(
@@ -79,6 +85,10 @@ void Car::Update(float deltaTime)
 	m_headLightRight->SetPosition(
 		m_position + glm::normalize(glm::cross(glm::vec3(0, 1, 0), m_direction)) * -1.2f
 		+ glm::vec3(0, 1, 0) - m_direction * 0.2f);
+
+	m_placeTracker->UpdateCurrentPositionOnTrack();
+
+	//std::cout << std::boolalpha << m_placeTracker->IsOutsideOfTrack() << std::endl;
 }
 
 void Car::Accelerate()
@@ -94,6 +104,11 @@ void Car::Brake()
 void Car::InertialDecceleration()
 {
 	m_engine->InertialDeccelerate();
+}
+
+void Car::InitPlaceTracker(const Track* track)
+{
+	m_placeTracker = std::make_unique<PlaceTracker>(this, track);
 }
 
 void Car::PrintData()

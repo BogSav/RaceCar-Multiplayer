@@ -1,5 +1,7 @@
 #include "amGame/Game.hpp"
 
+#include <iostream>
+
 Game::Game(GameSettings* gameSettings) : m_gameSettings(gameSettings)
 {
 }
@@ -16,11 +18,38 @@ void Game::Init()
 	m_camera = std::make_unique<CustomCamera>(
 		glm::vec3(0, 2, 3.5f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0), window->props.aspectRatio);
 
-	m_track = std::make_unique<Track>(m_gameSettings);
 	{
+		m_cameraAttachedToCar = std::make_shared<CustomCamera>();
+
+		m_car = std::make_unique<Car>(
+			m_gameSettings, m_shaders["SimpleShader"].get(), m_cameraAttachedToCar);
+	}
+
+	{
+		m_track = std::make_unique<Track>(m_gameSettings);
 		TrackBuilder* trackBuilder = new TrackBuilder(m_gameSettings, m_track.get());
-		trackBuilder->BuildTrack(m_shaders["SimpleShader"].get(), m_camera.get());
+		trackBuilder->BuildTrack(m_shaders["SimpleShader"].get(), m_cameraAttachedToCar.get());
 		delete trackBuilder;
+
+		m_car->InitPlaceTracker(m_track.get());
+	}
+
+	{
+		m_field = std::make_unique<Field>(
+			m_gameSettings, m_shaders["SimpleShader"].get(), m_cameraAttachedToCar.get());
+	}
+
+	{
+		for (size_t i = 0; i < m_gameSettings->GetWorldParameters().m_nrOfStreetLights; i++)
+		{
+			StreetLight* streetLight = new StreetLight(
+				m_gameSettings, m_shaders["TextureShader"].get(), m_cameraAttachedToCar.get(), m_textures["Pillar"]);
+			streetLight->SetPosition(
+				PositionGenerator::GeneratePosition(m_gameSettings, m_track.get()));
+			streetLight->InstantiateLightSources();
+
+			m_streetLights.emplace_back(streetLight);
+		}
 	}
 }
 
@@ -33,12 +62,26 @@ void Game::FrameStart()
 
 void Game::Render(float deltaTime)
 {
-	DrawCoordinateSystem(m_camera->GetViewMatrix(), m_camera->GetProjectionMatrix());
+	DrawCoordinateSystem(
+		m_cameraAttachedToCar->GetViewMatrix(), m_cameraAttachedToCar->GetProjectionMatrix());
 	m_track->Render();
+	m_car->Render();
+	m_field->Render();
+
+	for (auto& streetLight : m_streetLights)
+	{
+		streetLight->Render();
+	}
+
+	if (m_gameSettings->m_frameTimerEnabled && frameTimer.PassedTime(0.1))
+		std::cout << 1.f / deltaTime << std::endl;
 }
 
 void Game::Update(float deltaTimeSeconds)
 {
+	m_car->Update(deltaTimeSeconds);
+
+	// std::cout << m_placeTracker->GetCurrentPositionAsPercent() << std::endl;
 }
 
 void Game::FrameEnd()
@@ -78,31 +121,40 @@ void Game::OnInputUpdate(float deltaTime, int mods)
 			m_camera->TranslateUpward(-deltaTime * cameraSpeed);
 		}
 	}
-	// else
-	//{
-	//	// Control for the car
-	//	if (window->KeyHold(GLFW_KEY_W))
-	//	{
-	//		m_car->Accelerate();
-	//	}
-	//	else if (window->KeyHold(GLFW_KEY_S))
-	//	{
-	//		m_car->Brake();
-	//	}
-	//	else
-	//	{
-	//		m_car->InertialDecceleration();
-	//	}
+	else
+	{
+		// Control for the car
+		if (window->KeyHold(GLFW_KEY_W))
+		{
+			// if (m_cameraAttachedToCar->GetFov() < RADIANS(85))
+			//	m_cameraAttachedToCar->SetFov(m_cameraAttachedToCar->GetFov() + deltaTime *
+			//RADIANS(5));
+			m_car->Accelerate();
+		}
+		else if (window->KeyHold(GLFW_KEY_S))
+		{
+			// if (m_cameraAttachedToCar->GetFov() > RADIANS(70))
+			//	m_cameraAttachedToCar->SetFov(
+			//		m_cameraAttachedToCar->GetFov() - deltaTime * RADIANS(20));
+			m_car->Brake();
+		}
+		else
+		{
+			// if (m_cameraAttachedToCar->GetFov() > RADIANS(70))
+			//	m_cameraAttachedToCar->SetFov(
+			//		m_cameraAttachedToCar->GetFov() - deltaTime * RADIANS(10));
+			m_car->InertialDecceleration();
+		}
 
-	//	if (window->KeyHold(GLFW_KEY_A))
-	//	{
-	//		m_car->UpdateOrientation(deltaTime);
-	//	}
-	//	else if (window->KeyHold(GLFW_KEY_D))
-	//	{
-	//		m_car->UpdateOrientation(-deltaTime);
-	//	}
-	//}
+		if (window->KeyHold(GLFW_KEY_A))
+		{
+			m_car->UpdateOrientation(deltaTime);
+		}
+		else if (window->KeyHold(GLFW_KEY_D))
+		{
+			m_car->UpdateOrientation(-deltaTime);
+		}
+	}
 }
 
 void Game::OnKeyPress(int key, int mods)

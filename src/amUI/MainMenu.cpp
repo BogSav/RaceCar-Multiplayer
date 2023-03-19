@@ -87,7 +87,7 @@ void MainMenu::UpdateGameSettings(GameSettings* gameSettings)
 	gameSettings->m_nrOfPlayers = static_cast<int>(m_gameMode);
 
 	gameSettings->m_resolution = window->GetResolution();
-	gameSettings->m_frameTimerEnabled = false;
+	gameSettings->m_frameTimerEnabled = true;
 }
 
 void MainMenu::FrameStart()

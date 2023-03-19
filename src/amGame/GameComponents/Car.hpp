@@ -1,7 +1,6 @@
 #pragma once
 
 #include "BaseCar.hpp"
-
 #include "amGame/Physics/CarEngine.hpp"
 #include "amGame/Physics/CarGearBox.hpp"
 
@@ -9,7 +8,9 @@ class Car : public BaseCar
 {
 public:
 	Car() = delete;
-	Car(const GameSettings* gameSettings, const WindowObject*, const Shader* const);
+	Car(const GameSettings* gameSettings,
+		const Shader* const,
+		std::shared_ptr<CustomCamera>);
 
 	void Render() override;
 	void Update(float) override;
@@ -20,16 +21,15 @@ public:
 	void Brake();
 	void InertialDecceleration();
 
+	void InitPlaceTracker(const class Track*);
+
 	void PrintData();
 
 private:
 	void Render(CustomCamera* const camera, const Shader* const) const;
-
-private:
 	void ComputeModelMatrix();
 
 private:
-
 	std::unique_ptr<CarComponents::CarEngine> m_engine;
 	std::unique_ptr<CarComponents::GearBox> m_gearBox;
 
@@ -37,4 +37,6 @@ private:
 
 	const float m_distanceFromCamera;
 	const float m_stirringAngularSpeed;
+
+	std::unique_ptr<class PlaceTracker> m_placeTracker;
 };
