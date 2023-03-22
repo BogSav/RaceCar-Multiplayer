@@ -111,6 +111,21 @@ void Car::InitPlaceTracker(const Track* track)
 	m_placeTracker = std::make_unique<PlaceTracker>(this, track);
 }
 
+int Car::GetGear() const
+{
+	return m_gearBox->GetCurrentGear();
+}
+
+float Car::GetSpeed() const
+{
+	return m_engine->GetSpeedKmh();
+}
+
+float Car::GetProgress() const
+{
+	return m_placeTracker->GetCurrentPositionAsPercent();
+}
+
 void Car::PrintData()
 {
 	std::cout << m_engine->GetSpeedKmh() << " " << m_engine->GetCurrentGear() << std::endl;

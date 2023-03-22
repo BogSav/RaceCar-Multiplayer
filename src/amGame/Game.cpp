@@ -72,6 +72,10 @@ void Game::Init()
 
 		m_trees.emplace_back(tree);
 	}
+
+	{
+		m_screenElements = std::make_unique<ScreenElements>(m_gameSettings, m_car.get());
+	}
 }
 
 void Game::FrameStart()
@@ -85,6 +89,7 @@ void Game::Render(float deltaTime)
 {
 	DrawCoordinateSystem(
 		m_cameraAttachedToCar->GetViewMatrix(), m_cameraAttachedToCar->GetProjectionMatrix());
+
 	m_track->Render();
 	m_car->Render();
 	m_field->Render();
@@ -99,6 +104,8 @@ void Game::Render(float deltaTime)
 		tree->Render();
 	}
 
+	m_screenElements->Render();
+
 	if (m_gameSettings->m_frameTimerEnabled && frameTimer.PassedTime(0.1f))
 		std::cout << 1.f / deltaTime << std::endl;
 }
@@ -106,7 +113,7 @@ void Game::Render(float deltaTime)
 void Game::Update(float deltaTimeSeconds)
 {
 	m_car->Update(deltaTimeSeconds);
-
+	m_screenElements->Update();
 	// std::cout << m_placeTracker->GetCurrentPositionAsPercent() << std::endl;
 }
 

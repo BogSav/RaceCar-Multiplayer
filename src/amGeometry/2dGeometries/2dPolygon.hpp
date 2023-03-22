@@ -51,9 +51,9 @@ public:
 		const bool wireframe = false)
 		: Polygon2d(
 			v1,
-			v1 + glm::vec2{0, height},
+			v1 + glm::vec2{0.f, height},
 			v1 + glm::vec2{width, height},
-			v1 + glm::vec2{width, 0},
+			v1 + glm::vec2{width, 0.f},
 			color,
 			wireframe)
 	{

@@ -2,6 +2,8 @@
 
 #include "amGame/GameComponents/GameComponent.hpp"
 #include "amGame/GameComponents/Track.hpp"
+#include "amGame/GameComponents/Tree.hpp"
+#include "amGame/GameComponents/StreetLight.hpp"
 
 class PositionGenerator
 {

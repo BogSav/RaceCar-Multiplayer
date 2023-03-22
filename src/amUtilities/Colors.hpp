@@ -12,6 +12,13 @@ public:
 public:
 	constexpr Color() : dword() {}
 	constexpr Color(const Color& col) : dword(col.dword) {}
+	constexpr Color& operator=(const Color& col)
+	{
+		if (&col != this)
+			this->dword = col.dword;
+
+		return *this;
+	}
 	constexpr Color(unsigned int dw) : dword(dw) {}
 	constexpr Color(unsigned char x, unsigned char r, unsigned char g, unsigned char b)
 		: dword((x << 24u) | (r << 16u) | (g << 8u) | b)
@@ -22,11 +29,6 @@ public:
 	{
 	}
 	constexpr Color(Color col, unsigned char x) : Color((x << 24u) | col.dword) {}
-	Color& operator=(Color color)
-	{
-		dword = color.dword;
-		return *this;
-	}
 	constexpr unsigned char GetX() const { return dword >> 24u; }
 	constexpr unsigned char GetA() const { return GetX(); }
 	constexpr unsigned char GetR() const { return (dword >> 16u) & 0xFFu; }

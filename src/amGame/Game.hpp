@@ -11,6 +11,8 @@
 #include "amGame/GameComponents/StreetLight.hpp"
 #include "amGame/GameComponents/Tree.hpp"
 
+#include "amGame/Display/ScreenElements.hpp"
+
 #include "amGame/Lighting/LightSourceVector.hpp"
 
 class Game : public gfxc::SimpleScene
@@ -49,6 +51,8 @@ private:
 	std::shared_ptr<CustomCamera> m_cameraAttachedToCar;
 
 	LightSourcesVector m_lightSources;
+
+	std::unique_ptr<ScreenElements> m_screenElements;
 
 	// Game Components
 	std::unique_ptr<Track> m_track;

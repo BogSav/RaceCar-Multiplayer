@@ -20,7 +20,7 @@ public:
 
 	BoundingBox GetBBox() const { return m_bbox; }
 	glm::vec3 GetPosition() const { return m_position; }
-	glm::vec3 GetScael() const { return m_scale; }
+	glm::vec3 GetScale() const { return m_scale; }
 
 	void SetPosition(const glm::vec3& pos) { m_position = pos; }
 

@@ -125,12 +125,46 @@ public:
 		Color color;
 	};
 
+	struct InGameDisplayParameters
+	{
+		void InitParams()
+		{
+			tur_indicatorColor = Colors::White;
+			tur_numberingColor = Colors::White;
+			tur_backgroundColor = Colors::DarkGray;
+			tur_fontName = "Algerian.ttf";
+
+			progress_position = glm::vec3{1150.f, 350.f, 0.f};
+			progress_height = 300.f;
+			progress_width = 50.f;
+			progress_fillColor = Colors::LightGray;
+			progress_borderColor = Colors::LightGray;
+		}
+
+		// Turometer parameters
+		Color tur_indicatorColor;
+		Color tur_numberingColor;
+		Color tur_backgroundColor;
+		std::string tur_fontName;
+
+		// Progress handler parameters
+		glm::vec3 progress_position;
+		float progress_height;
+		float progress_width;
+		Color progress_fillColor;
+		Color progress_borderColor;
+	};
+
 public:
 	const PhysicsParameters& GetPhysicsParameters() const { return (m_physicsParameters); }
 	const WorldParameters& GetWorldParameters() const { return (m_worldParameters); }
 	const CarParameters& GetCarParameters() const { return (m_carParameters); }
 	const TrackParaneters& GetTrackParameters() const { return (m_trackParemetrs); }
 	const FieldParameters& GetFieldParameters() const { return m_fieldParameters; }
+	const InGameDisplayParameters& GetInGameDisplayParameters() const
+	{
+		return m_inGameDisplayParameters;
+	}
 
 	void InitParameters()
 	{
@@ -140,6 +174,7 @@ public:
 		m_carParameters.InitParameters();
 		m_trackParemetrs.InitParameters();
 		m_fieldParameters.InitParameters();
+		m_inGameDisplayParameters.InitParams();
 	}
 
 public:
@@ -159,4 +194,5 @@ private:
 	CarParameters m_carParameters;
 	TrackParaneters m_trackParemetrs;
 	FieldParameters m_fieldParameters;
+	InGameDisplayParameters m_inGameDisplayParameters;
 };

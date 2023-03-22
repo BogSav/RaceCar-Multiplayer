@@ -5,6 +5,8 @@
 #include "utils/glm_utils.h"
 #include "utils/math_utils.h"
 
+#define piOver2 1.57079633f
+
 namespace utils
 {
 

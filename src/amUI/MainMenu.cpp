@@ -10,7 +10,7 @@ MainMenu::MainMenu()
 		  static_cast<float>(window->GetResolution().x),
 		  static_cast<float>(window->GetResolution().y))
 {
-	m_textEngine = std::make_unique<TextEngine>(window);
+	m_textEngine = std::make_unique<TextEngine>();
 }
 
 MainMenu::~MainMenu()

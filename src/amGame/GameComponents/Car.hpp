@@ -23,6 +23,10 @@ public:
 
 	void InitPlaceTracker(const class Track*);
 
+	int GetGear() const;
+	float GetSpeed() const;
+	float GetProgress() const;
+
 	void PrintData();
 
 private:

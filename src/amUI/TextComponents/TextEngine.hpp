@@ -1,23 +1,21 @@
 #pragma once
 
+#include "amUtilities/Colors.hpp"
 #include "components/simple_scene.h"
 #include "components/text_renderer.h"
-
-#include "amUtilities/Colors.hpp"
 
 class TextEngine
 {
 public:
-	TextEngine() = delete;
-	TextEngine(
-		const WindowObject* window,
-		const std::string& fontName = "Hack-Bold.ttf",
-		const int fontSize = 18)
+	TextEngine(const std::string& fontName = "Hack-Bold.ttf", const int fontSize = 18)
 		: m_textRenderer(new gfxc::TextRenderer(
-			window->props.selfDir, window->GetResolution().x, window->GetResolution().y))
+			Engine::GetWindow()->props.selfDir,
+			Engine::GetWindow()->GetResolution().x,
+			Engine::GetWindow()->GetResolution().y))
 	{
 		m_textRenderer->Load(
-			PATH_JOIN(window->props.selfDir, RESOURCE_PATH::FONTS, fontName), fontSize);
+			PATH_JOIN(Engine::GetWindow()->props.selfDir, RESOURCE_PATH::FONTS, fontName),
+			fontSize);
 	}
 
 	void Render(
@@ -31,9 +29,10 @@ public:
 			text, posX, /*m_window->GetResolution().y -*/ posY, scale, color());
 	}
 
-	glm::vec2 GetSizeOfText(const std::string& text, const float scale = 1.f) {
+	glm::vec2 GetSizeOfText(const std::string& text, const float scale = 1.f)
+	{
 		glm::vec2 test{0, 0};
-		
+
 		for (auto c = text.cbegin(); c != text.cend(); c++)
 		{
 			gfxc::Character ch = m_textRenderer->Characters[*c];
