@@ -9,9 +9,8 @@ protected:
 		const GameSettings* gameSettings,
 		const Shader* const shader,
 		std::shared_ptr<CustomCamera> camera)
-		: GameComponent(gameSettings), m_shader(shader)
+		: GameComponent(gameSettings), m_shader(shader), m_camera(camera)
 	{
-		m_camera = camera;
 	};
 
 protected:

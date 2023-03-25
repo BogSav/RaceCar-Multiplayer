@@ -87,7 +87,7 @@ void MainMenu::UpdateGameSettings(GameSettings* gameSettings)
 	gameSettings->m_nrOfPlayers = static_cast<int>(m_gameMode);
 
 	gameSettings->m_resolution = window->GetResolution();
-	gameSettings->m_frameTimerEnabled = true;
+	gameSettings->m_frameTimerEnabled = false;
 }
 
 void MainMenu::FrameStart()
@@ -177,6 +177,7 @@ void MainMenu::OnMouseBtnPress(int mouseX, int mouseY, int button, int mods)
 		{
 			IncrementMenuState();
 			m_gameMode = GameMode::MULTIPLAYER;
+			Scene::CloseScene();
 		}
 
 		break;

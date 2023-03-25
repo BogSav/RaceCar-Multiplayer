@@ -2,7 +2,12 @@
 
 #include <iostream>
 
-Game::Game(GameSettings* gameSettings) : m_gameSettings(gameSettings)
+Game::Game(GameSettings* gameSettings) : m_gameSettings(gameSettings), m_client(nullptr)
+{
+}
+
+Game::Game(GameSettings* gameSettings, const Client* client)
+	: m_gameSettings(gameSettings), m_client(client)
 {
 }
 
@@ -23,6 +28,8 @@ void Game::Init()
 
 		m_car = std::make_unique<Car>(
 			m_gameSettings, m_shaders["SimpleShader"].get(), m_cameraAttachedToCar);
+		npc = std::make_unique<NPCCar>(
+			m_gameSettings, m_shaders["SimpleShader"].get(), m_cameraAttachedToCar, (*m_client));
 	}
 
 	{
@@ -92,6 +99,7 @@ void Game::Render(float deltaTime)
 
 	m_track->Render();
 	m_car->Render();
+	npc->Render();
 	m_field->Render();
 
 	for (auto& streetLight : m_streetLights)
@@ -113,6 +121,8 @@ void Game::Render(float deltaTime)
 void Game::Update(float deltaTimeSeconds)
 {
 	m_car->Update(deltaTimeSeconds);
+	npc->Update(deltaTimeSeconds);
+
 	m_screenElements->Update();
 	// std::cout << m_placeTracker->GetCurrentPositionAsPercent() << std::endl;
 }

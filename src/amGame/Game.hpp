@@ -10,6 +10,7 @@
 #include "amGame/GameComponents/PlaceTracker.hpp"
 #include "amGame/GameComponents/StreetLight.hpp"
 #include "amGame/GameComponents/Tree.hpp"
+#include "amGame/GameComponents/NPCCar.hpp"
 
 #include "amGame/Display/ScreenElements.hpp"
 
@@ -20,6 +21,7 @@ class Game : public gfxc::SimpleScene
 public:
 	Game() = delete;
 	Game(GameSettings* gameSettings);
+	Game(GameSettings* gameSettings, const Client* client);
 	~Game();
 
 	void Init() override;
@@ -43,6 +45,7 @@ private:
 
 private:
 	GameSettings* m_gameSettings;
+	const Client* m_client;
 
 	std::unordered_map<std::string, std::shared_ptr<Texture2D>> m_textures;
 	std::unordered_map<std::string, std::unique_ptr<Shader>> m_shaders;
@@ -60,6 +63,8 @@ private:
 	std::unique_ptr<Field> m_field;
 	std::vector<std::unique_ptr<StreetLight>> m_streetLights;
 	std::vector<std::unique_ptr<Tree>> m_trees;
+
+	std::unique_ptr<NPCCar> npc;
 
 	FTimer frameTimer;
 };

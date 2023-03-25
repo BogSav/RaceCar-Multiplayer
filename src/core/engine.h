@@ -6,7 +6,6 @@
 
 #include "core/window/window_object.h"
 
-
 class Engine
 {
  public:

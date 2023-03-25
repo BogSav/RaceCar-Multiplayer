@@ -5,6 +5,8 @@
 #include "core/managers/texture_manager.h"
 #include "utils/gl_utils.h"
 
+#include "amConnectivity/Client.hpp"
+
 
 WindowObject* Engine::window = nullptr;
 

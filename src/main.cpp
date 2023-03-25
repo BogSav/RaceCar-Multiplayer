@@ -1,19 +1,12 @@
-#include "components/simple_scene.h"
-#include "core/engine.h"
-
 #include <ctime>
 #include <iostream>
 
-// #if defined(GAME)
-// #   include "Game/Game.hpp"
-// #endif
-
-#if defined(UI)
-#include "amUI/MainMenu.hpp"
+#if defined(GAME)
+#include "amGame/GameHandler.hpp"
 #endif
 
-#if defined(GAME)
-#include "amGame/Game.hpp"
+#if defined(CONNECTIVITY)
+#include "amConnectivity/Client.hpp"
 #endif
 
 #define _CRTDBG_MAP_ALLOC
@@ -25,7 +18,6 @@ PREFER_DISCRETE_GPU_NVIDIA;
 PREFER_DISCRETE_GPU_AMD;
 #endif
 
-
 std::string GetParentDir(const std::string& filePath)
 {
 	size_t pos = filePath.find_last_of("\\/");
@@ -34,41 +26,23 @@ std::string GetParentDir(const std::string& filePath)
 
 int main(int argc, char** argv)
 {
-	_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
-	_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
-	_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
-	_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
-	_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
-	_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+	//_CrtSetReportMode(_CRT_WARN, _CRTDBG_MODE_FILE);
+	//_CrtSetReportFile(_CRT_WARN, _CRTDBG_FILE_STDERR);
+	//_CrtSetReportMode(_CRT_ERROR, _CRTDBG_MODE_FILE);
+	//_CrtSetReportFile(_CRT_ERROR, _CRTDBG_FILE_STDERR);
+	//_CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+	//_CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
 
 	srand((unsigned int)time(NULL));
 
-	// Create a window property structure
-	WindowProperties wp;
-	wp.resolution = glm::ivec2(1280, 720);
-	wp.vSync = true;
-	wp.selfDir = GetParentDir(std::string(argv[0]));
+	std::mutex mutex_;
+	std::condition_variable cv;
 
-	// Init the Engine and create a new window with the defined properties
-	(void)Engine::Init(wp);
+	Client client(mutex_, cv);
+	GameHandler game(mutex_, cv, &client, GetParentDir(std::string(argv[0])));
 
-	GameSettings* gameSettings = new GameSettings();
-
-	{
-		Scene* mainMenu = new MainMenu();
-		mainMenu->Init();
-		mainMenu->Run();
-		dynamic_cast<MainMenu*>(mainMenu)->UpdateGameSettings(gameSettings);
-		delete mainMenu;
-	}
-
-	{
-		Scene* game = new Game(gameSettings);
-		game->Init();
-		game->Run();
-	}
-
-	Engine::Exit();
+	game.join();
+	client.join();
 
 	//_CrtDumpMemoryLeaks();
 
