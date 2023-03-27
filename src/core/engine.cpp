@@ -8,6 +8,7 @@
 
 WindowObject* Engine::window = nullptr;
 GameSettings* Engine::settings = nullptr;
+Connection* Engine::connection = nullptr;
 
 
 WindowObject* Engine::Init(const WindowProperties & props)
@@ -46,6 +47,16 @@ void Engine::SetGameSettings(GameSettings* gameSettings)
 GameSettings* Engine::GetGameSettings()
 {
 	return Engine::settings;
+}
+
+void Engine::SetConnection(Connection* connection)
+{
+	Engine::connection = connection;
+}
+
+Connection* Engine::GetConnection()
+{
+	return Engine::connection;
 }
 
 

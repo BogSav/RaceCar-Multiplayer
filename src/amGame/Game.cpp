@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-Game::Game(Client* client) : m_client(client)
+Game::Game(Connection* client) : m_client(client)
 {
 }
 
@@ -22,9 +22,9 @@ void Game::Init()
 		m_cameraAttachedToCar = std::make_shared<CustomCamera>();
 
 		m_car = std::make_unique<Car>(
-			m_shaders["SimpleShader"].get(), m_cameraAttachedToCar, (*m_client));
+			m_shaders["SimpleShader"].get(), m_cameraAttachedToCar, *m_client);
 		npc = std::make_unique<NPCCar>(
-			m_shaders["SimpleShader"].get(), m_cameraAttachedToCar, (*m_client));
+			m_shaders["SimpleShader"].get(), m_cameraAttachedToCar, *m_client);
 	}
 
 	{

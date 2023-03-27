@@ -1,12 +1,12 @@
 #pragma once
 
 #include "GameComponent.hpp"
-#include "amConnectivity/Client.hpp"
+#include "amConnectivity/Connection.hpp"
 
 class BaseCar : public GameComponent
 {
 protected:
-	BaseCar(const Shader* const shader, std::shared_ptr<CustomCamera> camera, Client& client)
+	BaseCar(const Shader* const shader, std::shared_ptr<CustomCamera> camera, Connection& client)
 		: GameComponent(), m_shader(shader), m_camera(camera), m_client(client){};
 
 	void InitMesh()
@@ -17,7 +17,7 @@ protected:
 	}
 
 protected:
-	Client& m_client;
+	Connection& m_client;
 
 	const Shader* const m_shader;
 	std::shared_ptr<CustomCamera> m_camera;

@@ -7,7 +7,7 @@
 Car::Car(
 	const Shader* const shader,
 	std::shared_ptr<CustomCamera> camera,
-	Client& client)
+	Connection& client)
 	: BaseCar(shader, camera, client),
 	  m_distanceFromCamera(6.f),
 	  m_stirringAngularSpeed(RADIANS(45.f))

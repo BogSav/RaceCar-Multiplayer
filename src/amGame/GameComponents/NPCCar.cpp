@@ -1,6 +1,6 @@
 #include "NPCCar.hpp"
 
-NPCCar::NPCCar(const Shader* const shader, std::shared_ptr<CustomCamera> camera, Client& client)
+NPCCar::NPCCar(const Shader* const shader, std::shared_ptr<CustomCamera> camera, Connection& client)
 	: BaseCar(shader, camera, client)
 {
 	BaseCar::InitMesh();

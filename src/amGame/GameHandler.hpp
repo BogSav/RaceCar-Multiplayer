@@ -1,8 +1,8 @@
 #pragma once
 
+#include "amConnectivity/Connection.hpp"
 #include "amGame/Game.hpp"
 #include "amUI/MainMenu.hpp"
-#include "amConnectivity/Client.hpp"
 
 #include <iostream>
 #include <mutex>
@@ -11,12 +11,13 @@
 class GameHandler : public std::thread
 {
 public:
-	GameHandler(
-		std::mutex& mutex, std::condition_variable& cv, Client* client, std::string selfDirPath)
-		: std::thread(&GameHandler::handle_entierty, this), mutex_(mutex), cv_(cv), m_client(client)
+	GameHandler(Connection* connection, std::string selfDirPath)
+		: std::thread(&GameHandler::handle_entierty, this),
+		  m_connection(connection),
+		  mutex_(connection->GetClientMutex()),
+		  cv_(connection->GetConditionVariable())
 	{
 		Engine::SetGameSettings(new GameSettings());
-
 		this->selfDirPath = selfDirPath;
 	}
 
@@ -52,7 +53,7 @@ private:
 
 	void handle_game()
 	{
-		Scene* game = new Game(m_client);
+		Scene* game = new Game(m_connection);
 		game->Init();
 		game->Run();
 		delete game;
@@ -62,7 +63,19 @@ private:
 	{
 		if (Engine::GetGameSettings()->m_isMultiplayer)
 		{
-			cv_.notify_one();
+			{
+				std::lock_guard<std::mutex> lock(mutex_);
+				m_connection->SetMultiplayerFlag(true);
+				cv_.notify_one();
+			}
+
+			{
+				std::unique_lock<std::mutex> lock(mutex_);
+				while (!m_connection->GetConnectionFlag())
+				{
+					cv_.wait(lock);
+				}
+			}
 		}
 	}
 
@@ -72,5 +85,5 @@ private:
 
 	std::string selfDirPath;
 
-	Client* m_client;
+	Connection* m_connection;
 };

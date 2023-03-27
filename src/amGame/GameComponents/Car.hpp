@@ -8,7 +8,7 @@ class Car : public BaseCar
 {
 public:
 	Car() = delete;
-	Car(const Shader* const, std::shared_ptr<CustomCamera>, Client&);
+	Car(const Shader* const, std::shared_ptr<CustomCamera>, Connection&);
 
 	void Render() override;
 	void Update(float) override;

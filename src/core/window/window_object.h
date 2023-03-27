@@ -7,6 +7,7 @@
 #include "core/window/window_callbacks.h"
 
 #include "amGame/GameSettings.hpp"
+#include "amConnectivity/Connection.hpp"
 
 
 class WindowProperties

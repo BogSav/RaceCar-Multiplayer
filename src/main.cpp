@@ -5,10 +5,6 @@
 #include "amGame/GameHandler.hpp"
 #endif
 
-#if defined(CONNECTIVITY)
-#include "amConnectivity/Client.hpp"
-#endif
-
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #include <cstdlib>
@@ -35,14 +31,11 @@ int main(int argc, char** argv)
 
 	srand((unsigned int)time(NULL));
 
-	std::mutex mutex_;
-	std::condition_variable cv;
-
-	Client client(mutex_, cv);
-	GameHandler game(mutex_, cv, &client, GetParentDir(std::string(argv[0])));
+	Connection connection{};
+	GameHandler game(&connection, GetParentDir(std::string(argv[0])));
 
 	game.join();
-	client.join();
+	connection.join();
 
 	//_CrtDumpMemoryLeaks();
 
