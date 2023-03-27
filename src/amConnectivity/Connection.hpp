@@ -1,6 +1,5 @@
 #pragma once
 
-#include "amGame/GameComponents/Car.hpp"
 #include "utils/glm_utils.h"
 #include "utils/math_utils.h"
 
@@ -32,6 +31,7 @@ public:
 		long port = 25565);
 
 	void UpdatePositionAndDirection(glm::vec3& pos, float& angleOrientation) const;
+	void UpdateClientParams(const glm::vec3& pos, const float& angleOrientation);
 
 private:
 	void handle_client();
@@ -42,7 +42,8 @@ private:
 	std::string m_ip_adress_string;
 	long m_port;
 
-	position_and_direction params;
+	position_and_direction npc_params;
+	position_and_direction client_params;
 
 	boost::asio::io_context io_;
 	tcp::socket socket_;
@@ -51,6 +52,7 @@ private:
 
 	boost::array<uint8_t, 1024> data;
 
-	std::mutex& mutex_;
+	std::mutex& mutex_client;
+	mutable std::mutex mutex_NPC;
 	std::condition_variable& cv_;
 };

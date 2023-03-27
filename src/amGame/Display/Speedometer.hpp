@@ -1,6 +1,5 @@
 #pragma once
 
-#include "amGame/GameSettings.hpp"
 #include "amGeometry/2dGeometries/2dGeometriesIncludes.hpp"
 #include "amUI/TextComponents/TextEngine.hpp"
 #include "amUtilities/Utilities.hpp"
@@ -11,19 +10,18 @@ class Speedometer
 {
 public:
 	Speedometer() = delete;
-	Speedometer(const GameSettings* gameSettings, std::shared_ptr<TextEngine>& textEngine)
-		: m_gameSettings(gameSettings)
+	Speedometer(std::shared_ptr<TextEngine>& textEngine)
 	{
 		m_background = std::make_unique<SemiCircle2d>(
 			glm::vec2{175.f, 0.f},
 			175.f,
 			16.f,
-			m_gameSettings->GetInGameDisplayParameters().tur_backgroundColor);
+			Engine::GetGameSettings()->GetInGameDisplayParameters().tur_backgroundColor);
 		m_indicator = std::make_unique<Polygon2d>(
 			glm::vec2{-5.f, 0.f},
 			7.f,
 			74.f,
-			m_gameSettings->GetInGameDisplayParameters().tur_indicatorColor);
+			Engine::GetGameSettings()->GetInGameDisplayParameters().tur_indicatorColor);
 
 		m_textEngine = textEngine;
 	}
@@ -43,31 +41,31 @@ public:
 			22.f,
 			659.f,
 			1.2f,
-			m_gameSettings->GetInGameDisplayParameters().tur_numberingColor);
+			Engine::GetGameSettings()->GetInGameDisplayParameters().tur_numberingColor);
 		m_textEngine->Render(
 			"85",
 			66.f,
 			600.f,
 			1.2f,
-			m_gameSettings->GetInGameDisplayParameters().tur_numberingColor);
+			Engine::GetGameSettings()->GetInGameDisplayParameters().tur_numberingColor);
 		m_textEngine->Render(
 			"170",
 			153.f,
 			572.f,
 			1.2f,
-			m_gameSettings->GetInGameDisplayParameters().tur_numberingColor);
+			Engine::GetGameSettings()->GetInGameDisplayParameters().tur_numberingColor);
 		m_textEngine->Render(
 			"255",
 			236.f,
 			600.f,
 			1.2f,
-			m_gameSettings->GetInGameDisplayParameters().tur_numberingColor);
+			Engine::GetGameSettings()->GetInGameDisplayParameters().tur_numberingColor);
 		m_textEngine->Render(
 			"340",
 			296.f,
 			659.f,
 			1.2f,
-			m_gameSettings->GetInGameDisplayParameters().tur_numberingColor);
+			Engine::GetGameSettings()->GetInGameDisplayParameters().tur_numberingColor);
 
 		// Render the indicator line
 		m_indicator->Render(
@@ -101,8 +99,6 @@ private:
 	std::unique_ptr<GeometryObject2d> m_background;
 
 	std::shared_ptr<TextEngine> m_textEngine;
-
-	const GameSettings* m_gameSettings;
 
 	float m_speed = 0.f;
 	int m_gear = 0;

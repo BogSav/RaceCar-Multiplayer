@@ -6,14 +6,12 @@ class Tree : public GameComponent
 {
 public:
 	Tree(
-		const GameSettings* gameSettings,
 		const Shader* const shader,
 		CustomCamera* const camera,
 		std::shared_ptr<Texture2D>& crownTexture,
 		std::shared_ptr<Texture2D>& trunkTexture);
 
 	Tree(
-		const GameSettings* gameSettings,
 		const Shader* const shader,
 		CustomCamera* const camera,
 		std::shared_ptr<Texture2D>& crownTexture,
@@ -23,9 +21,7 @@ public:
 		std::string crownMeshName);
 
 	void Render() override;
-	void Render(
-		const glm::vec3& eyePosition,
-		const LightSourcesVector& lightingComponents);
+	void Render(const glm::vec3& eyePosition, const LightSourcesVector& lightingComponents);
 
 	void InstantiateLightSource();
 	const LightSourceAdapter* GetLightSoruce() const { return m_lightSource.get(); }

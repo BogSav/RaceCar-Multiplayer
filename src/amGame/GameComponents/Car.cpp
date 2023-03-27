@@ -5,16 +5,14 @@
 #include <iostream>
 
 Car::Car(
-	const GameSettings* gameSettings,
 	const Shader* const shader,
-	std::shared_ptr<CustomCamera> camera)
-	: BaseCar(gameSettings, shader, camera),
+	std::shared_ptr<CustomCamera> camera,
+	Client& client)
+	: BaseCar(shader, camera, client),
 	  m_distanceFromCamera(6.f),
 	  m_stirringAngularSpeed(RADIANS(45.f))
 {
-	m_mesh = std::make_unique<Mesh>();
-	m_mesh->LoadMesh(
-		PATH_JOIN(Engine::GetWindow()->props.selfDir, RESOURCE_PATH::MODELS, "mele"), "F1.obj");
+	BaseCar::InitMesh();
 
 	m_position = {-10.f, -0.1f, -40.f};
 	m_scale = {0.7f, 0.7f, 0.7f};
@@ -31,8 +29,8 @@ Car::Car(
 	m_camera->TranslateUpward(m_distanceFromCamera);
 	m_camera->RotateFirstPerson_OX(RADIANS(-15));
 
-	m_gearBox = std::make_unique<CarComponents::GearBox>(gameSettings->GetCarParameters());
-	m_engine = std::make_unique<CarComponents::CarEngine>(*gameSettings, m_gearBox.get());
+	m_gearBox = std::make_unique<CarComponents::GearBox>();
+	m_engine = std::make_unique<CarComponents::CarEngine>(m_gearBox.get());
 
 	m_headLightLeft = std::make_unique<SpotLight>(
 		glm::vec3(0, 0, 0), Colors::White, 15.0f, RADIANS(15), m_direction, glm::vec3(0, 0, 1));

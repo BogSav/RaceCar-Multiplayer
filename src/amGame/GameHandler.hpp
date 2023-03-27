@@ -1,8 +1,8 @@
 #pragma once
 
 #include "amGame/Game.hpp"
-#include "amGame/GameSettings.hpp"
 #include "amUI/MainMenu.hpp"
+#include "amConnectivity/Client.hpp"
 
 #include <iostream>
 #include <mutex>
@@ -12,16 +12,11 @@ class GameHandler : public std::thread
 {
 public:
 	GameHandler(
-		std::mutex& mutex,
-		std::condition_variable& cv,
-		const Client* client,
-		std::string selfDirPath)
-		: std::thread(&GameHandler::handle_entierty, this),
-		  mutex_(mutex),
-		  cv_(cv),
-		  m_client(client)
+		std::mutex& mutex, std::condition_variable& cv, Client* client, std::string selfDirPath)
+		: std::thread(&GameHandler::handle_entierty, this), mutex_(mutex), cv_(cv), m_client(client)
 	{
-		gameSettings = new GameSettings();
+		Engine::SetGameSettings(new GameSettings());
+
 		this->selfDirPath = selfDirPath;
 	}
 
@@ -51,13 +46,13 @@ private:
 		Scene* mainMenu = new MainMenu();
 		mainMenu->Init();
 		mainMenu->Run();
-		dynamic_cast<MainMenu*>(mainMenu)->UpdateGameSettings(gameSettings);
+		dynamic_cast<MainMenu*>(mainMenu)->UpdateGameSettings();
 		delete mainMenu;
 	}
 
 	void handle_game()
 	{
-		Scene* game = new Game(gameSettings, m_client);
+		Scene* game = new Game(m_client);
 		game->Init();
 		game->Run();
 		delete game;
@@ -65,7 +60,7 @@ private:
 
 	void handle_multiplayer_if_needed()
 	{
-		if (gameSettings->m_isMultiplayer)
+		if (Engine::GetGameSettings()->m_isMultiplayer)
 		{
 			cv_.notify_one();
 		}
@@ -77,6 +72,5 @@ private:
 
 	std::string selfDirPath;
 
-	GameSettings* gameSettings;
-	const Client* m_client;
+	Client* m_client;
 };

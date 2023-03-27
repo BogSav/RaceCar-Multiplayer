@@ -8,9 +8,7 @@ class Car : public BaseCar
 {
 public:
 	Car() = delete;
-	Car(const GameSettings* gameSettings,
-		const Shader* const,
-		std::shared_ptr<CustomCamera>);
+	Car(const Shader* const, std::shared_ptr<CustomCamera>, Client&);
 
 	void Render() override;
 	void Update(float) override;
@@ -36,8 +34,6 @@ private:
 private:
 	std::unique_ptr<CarComponents::CarEngine> m_engine;
 	std::unique_ptr<CarComponents::GearBox> m_gearBox;
-
-	std::unique_ptr<Mesh> m_mesh;
 
 	const float m_distanceFromCamera;
 	const float m_stirringAngularSpeed;

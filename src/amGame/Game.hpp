@@ -1,7 +1,6 @@
 #pragma once
 
 #include "components/simple_scene.h"
-#include "amGame/GameSettings.hpp"
 
 #include "amGame/GameComponents/GameComponent.hpp"
 #include "amGame/GameComponents/TrackBuilder.hpp"
@@ -20,8 +19,7 @@ class Game : public gfxc::SimpleScene
 {
 public:
 	Game() = delete;
-	Game(GameSettings* gameSettings);
-	Game(GameSettings* gameSettings, const Client* client);
+	Game(Client* client);
 	~Game();
 
 	void Init() override;
@@ -44,8 +42,7 @@ private:
 	void CreateTextures();
 
 private:
-	GameSettings* m_gameSettings;
-	const Client* m_client;
+	Client* m_client;
 
 	std::unordered_map<std::string, std::shared_ptr<Texture2D>> m_textures;
 	std::unordered_map<std::string, std::unique_ptr<Shader>> m_shaders;

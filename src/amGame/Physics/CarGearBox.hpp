@@ -10,8 +10,7 @@ namespace CarComponents
 {
 struct GearBox
 {
-	GearBox() = delete;
-	GearBox(const GameSettings::CarParameters& carParameters) : m_carParameters(carParameters)
+	GearBox() : m_carParameters(Engine::GetGameSettings()->GetCarParameters())
 	{
 	}
 

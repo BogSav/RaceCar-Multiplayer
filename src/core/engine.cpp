@@ -5,10 +5,9 @@
 #include "core/managers/texture_manager.h"
 #include "utils/gl_utils.h"
 
-#include "amConnectivity/Client.hpp"
-
 
 WindowObject* Engine::window = nullptr;
+GameSettings* Engine::settings = nullptr;
 
 
 WindowObject* Engine::Init(const WindowProperties & props)
@@ -37,6 +36,16 @@ WindowObject* Engine::Init(const WindowProperties & props)
 WindowObject* Engine::GetWindow()
 {
     return window;
+}
+
+void Engine::SetGameSettings(GameSettings* gameSettings)
+{
+	Engine::settings = gameSettings;
+}
+
+GameSettings* Engine::GetGameSettings()
+{
+	return Engine::settings;
 }
 
 

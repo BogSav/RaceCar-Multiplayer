@@ -4,8 +4,7 @@
 
 #include <fstream>
 
-TrackBuilder::TrackBuilder(const GameSettings* gameSettings, Track* track)
-	: m_gameSettings(gameSettings), m_track(track)
+TrackBuilder::TrackBuilder(Track* track) : m_track(track)
 {
 }
 
@@ -21,7 +20,7 @@ void TrackBuilder::BuildTrack(const Shader* const shader, CustomCamera* camera)
 
 void TrackBuilder::ReadTrackPointsFromFile()
 {
-	std::string fileName = m_gameSettings->GetTrackParameters().m_trackName + ".txt";
+	std::string fileName = Engine::GetGameSettings()->GetTrackParameters().m_trackName + ".txt";
 	std::string path = PATH_JOIN(SOURCE_PATH::Game, "Piste", fileName);
 
 	std::ifstream inputf;
@@ -44,9 +43,9 @@ void TrackBuilder::ReadTrackPointsFromFile()
 			inputf >> x >> y >> z;
 
 			m_track->m_trackPoints.emplace_back(
-				m_gameSettings->GetTrackParameters().m_scaleFactor * x,
+				Engine::GetGameSettings()->GetTrackParameters().m_scaleFactor * x,
 				0,
-				m_gameSettings->GetTrackParameters().m_scaleFactor * -y);
+				Engine::GetGameSettings()->GetTrackParameters().m_scaleFactor * -y);
 		}
 
 		inputf.close();
@@ -74,7 +73,7 @@ void TrackBuilder::GenerateExteriorPoints()
 			glm::normalize(exteriorDirection1 + exteriorDirection2);
 
 		const glm::vec3 exteriorPoint = *m_track->m_trackPoints.cbegin()
-			+ finalExteriorDirection * m_gameSettings->GetTrackParameters().m_width;
+			+ finalExteriorDirection * Engine::GetGameSettings()->GetTrackParameters().m_width;
 
 		m_track->m_exteriorPoints.push_back(exteriorPoint);
 	}
@@ -92,8 +91,8 @@ void TrackBuilder::GenerateExteriorPoints()
 		const glm::vec3 finalExteriorDirection =
 			glm::normalize((exteriorDirection1 + exteriorDirection2) / 2.f);
 
-		const glm::vec3 exteriorPoint =
-			*std::next(it) + finalExteriorDirection * m_gameSettings->GetTrackParameters().m_width;
+		const glm::vec3 exteriorPoint = *std::next(it)
+			+ finalExteriorDirection * Engine::GetGameSettings()->GetTrackParameters().m_width;
 
 		m_track->m_exteriorPoints.push_back(exteriorPoint);
 	}
@@ -111,7 +110,7 @@ void TrackBuilder::GenerateExteriorPoints()
 			glm::normalize(exteriorDirection1 + exteriorDirection2);
 
 		const glm::vec3 exteriorPoint = *std::prev(m_track->m_trackPoints.end())
-			+ finalExteriorDirection * m_gameSettings->GetTrackParameters().m_width;
+			+ finalExteriorDirection * Engine::GetGameSettings()->GetTrackParameters().m_width;
 
 		m_track->m_exteriorPoints.push_back(exteriorPoint);
 	}
@@ -129,14 +128,14 @@ void TrackBuilder::GenerateGeometries(const Shader* const shader, CustomCamera* 
 			m_track->m_exteriorPoints[it],
 			m_track->m_trackPoints[it],
 			m_track->m_trackPoints[it + 1],
-			m_gameSettings->GetTrackParameters().m_roadColor));
+			Engine::GetGameSettings()->GetTrackParameters().m_roadColor));
 		m_track->m_geometries.emplace_back(new Triangle3d(
 			shader,
 			camera,
 			m_track->m_exteriorPoints[it],
 			m_track->m_trackPoints[it + 1],
 			m_track->m_exteriorPoints[it + 1],
-			m_gameSettings->GetTrackParameters().m_roadColor));
+			Engine::GetGameSettings()->GetTrackParameters().m_roadColor));
 	}
 	{
 		m_track->m_geometries.emplace_back(new Triangle3d(
@@ -145,14 +144,14 @@ void TrackBuilder::GenerateGeometries(const Shader* const shader, CustomCamera* 
 			*std::prev(m_track->m_exteriorPoints.end()),
 			*std::prev(m_track->m_trackPoints.end()),
 			*m_track->m_trackPoints.begin(),
-			m_gameSettings->GetTrackParameters().m_roadColor));
+			Engine::GetGameSettings()->GetTrackParameters().m_roadColor));
 		m_track->m_geometries.emplace_back(new Triangle3d(
 			shader,
 			camera,
 			*std::prev(m_track->m_exteriorPoints.end()),
 			*m_track->m_trackPoints.begin(),
 			*m_track->m_exteriorPoints.begin(),
-			m_gameSettings->GetTrackParameters().m_roadColor));
+			Engine::GetGameSettings()->GetTrackParameters().m_roadColor));
 	}
 }
 
@@ -175,6 +174,6 @@ void TrackBuilder::GenerateLines(const Shader* const shader, CustomCamera* camer
 			utils::GetInterpolatedPoint(
 				m_track->m_trackPoints[i + 1], m_track->m_exteriorPoints[i + 1], 0.48f)
 				+ glm::vec3{0, 0.001, 0},
-			m_gameSettings->GetTrackParameters().m_linesColor));
+			Engine::GetGameSettings()->GetTrackParameters().m_linesColor));
 	}
 }

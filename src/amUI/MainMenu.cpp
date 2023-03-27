@@ -77,9 +77,11 @@ void MainMenu::Init()
 	// test = std::make_unique<Polygon2d>(glm::vec2{-1.f, -1.f}, 2.f, 2.f, Colors::Red);
 }
 
-void MainMenu::UpdateGameSettings(GameSettings* gameSettings)
+void MainMenu::UpdateGameSettings()
 {
-	// Momentan le lasam valori default pana sa puitem alege din UI parametrii
+	GameSettings* gameSettings = Engine::GetGameSettings();
+
+	// TODO add UI entries for each settings
 	gameSettings->InitParameters();
 
 	gameSettings->m_isMultiplayer = m_gameMode == GameMode::MULTIPLAYER;

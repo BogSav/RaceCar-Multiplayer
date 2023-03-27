@@ -1,10 +1,6 @@
 #pragma once
 
 #include "amUtilities/Colors.hpp"
-#include "components/simple_scene.h"
-#include "core/engine.h"
-#include "utils/glm_utils.h"
-#include "utils/math_utils.h"
 
 class GameSettings
 {

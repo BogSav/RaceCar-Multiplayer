@@ -1,12 +1,10 @@
 #include "StreetLight.hpp"
 
 StreetLight::StreetLight(
-	const GameSettings* gameSettings,
 	const Shader* const shader,
 	CustomCamera* const camera,
 	std::shared_ptr<Texture2D>& texture)
 	: StreetLight(
-		gameSettings,
 		shader,
 		camera,
 		texture,
@@ -16,13 +14,12 @@ StreetLight::StreetLight(
 }
 
 StreetLight::StreetLight(
-	const GameSettings* gameSettings,
 	const Shader* const shader,
 	CustomCamera* const camera,
 	std::shared_ptr<Texture2D>& texture,
 	std::string meshPath,
 	std::string meshName)
-	: GameComponent(gameSettings)
+	: GameComponent()
 {
 	m_texture = texture;
 

@@ -6,10 +6,10 @@ class Field : public GameComponent
 {
 public:
 	Field() = delete;
-	Field(const GameSettings* gameSettings, const Shader* const shader, CustomCamera* const camera)
-		: GameComponent(gameSettings)
+	Field(const Shader* const shader, CustomCamera* const camera)
+		: GameComponent()
 	{
-		if (gameSettings->GetFieldParameters().increaseTextureDensity)
+		if (Engine::GetGameSettings()->GetFieldParameters().increaseTextureDensity)
 		{
 			this->IncreaseTextureDensity(shader, camera);
 		}
@@ -28,35 +28,40 @@ public:
 	void Render(const glm::vec3& eyePosition, const LightSourcesVector& lightingComponents) override
 	{
 		for (auto& geometry : m_geometries)
-			GeometryRenderer::Render(geometry.get(), m_modelMatrix, eyePosition, lightingComponents);
+			GeometryRenderer::Render(
+				geometry.get(), m_modelMatrix, eyePosition, lightingComponents);
 	}
 
 private:
 	void IncreaseTextureDensity(const Shader* const shader, CustomCamera* const camera)
 	{
-		const float zstep = m_gameSettings->GetFieldParameters().length
-			/ static_cast<const float>(m_gameSettings->GetFieldParameters().ozTriangleDensity);
-		const float xstep = m_gameSettings->GetFieldParameters().width
-			/ static_cast<const float>(m_gameSettings->GetFieldParameters().oxTrianglreDensity);
+		const float zstep = Engine::GetGameSettings()->GetFieldParameters().length
+			/ static_cast<const float>(
+								Engine::GetGameSettings()->GetFieldParameters().ozTriangleDensity);
+		const float xstep = Engine::GetGameSettings()->GetFieldParameters().width
+			/ static_cast<const float>(
+								Engine::GetGameSettings()->GetFieldParameters().oxTrianglreDensity);
 
-		for (float currentZstep = 0; currentZstep < m_gameSettings->GetFieldParameters().length;
+		for (float currentZstep = 0;
+			 currentZstep < Engine::GetGameSettings()->GetFieldParameters().length;
 			 currentZstep += zstep)
 		{
-			for (float currentXstep = 0; currentXstep < m_gameSettings->GetFieldParameters().width;
+			for (float currentXstep = 0;
+				 currentXstep < Engine::GetGameSettings()->GetFieldParameters().width;
 				 currentXstep += xstep)
 			{
 				m_geometries.emplace_back(new Polygon3d(
 					shader,
 					camera,
-					m_gameSettings->GetFieldParameters().startPos
+					Engine::GetGameSettings()->GetFieldParameters().startPos
 						+ glm::vec3{currentXstep + xstep, -0.1, currentZstep},
-					m_gameSettings->GetFieldParameters().startPos
+					Engine::GetGameSettings()->GetFieldParameters().startPos
 						+ glm::vec3{currentXstep, -0.1, currentZstep},
-					m_gameSettings->GetFieldParameters().startPos
+					Engine::GetGameSettings()->GetFieldParameters().startPos
 						+ glm::vec3{currentXstep, -0.1, currentZstep + zstep},
-					m_gameSettings->GetFieldParameters().startPos
+					Engine::GetGameSettings()->GetFieldParameters().startPos
 						+ glm::vec3{currentXstep + xstep, -0.1, currentZstep + zstep},
-					m_gameSettings->GetFieldParameters().color));
+					Engine::GetGameSettings()->GetFieldParameters().color));
 			}
 		}
 	}

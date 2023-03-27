@@ -8,16 +8,19 @@
 
 class Engine
 {
- public:
-    static WindowObject* Init(const WindowProperties &props);
+public:
+	static WindowObject* Init(const WindowProperties& props);
+	static WindowObject* GetWindow();
 
-    static WindowObject* GetWindow();
+	static void SetGameSettings(GameSettings*);
+	static GameSettings* GetGameSettings();
 
-    // Get elapsed time in seconds since the application started
-    static double GetElapsedTime();
+	// Get elapsed time in seconds since the application started
+	static double GetElapsedTime();
 
-    static void Exit();
+	static void Exit();
 
- private:
-    static WindowObject* window;
+private:
+	static WindowObject* window;
+	static GameSettings* settings;
 };

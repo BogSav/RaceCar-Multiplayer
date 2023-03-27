@@ -6,13 +6,11 @@ class StreetLight : public GameComponent
 {
 public:
 	StreetLight(
-		const GameSettings* gameSettings,
 		const Shader* const shader,
 		CustomCamera* const camera,
 		std::shared_ptr<Texture2D>& texture);
 
 	StreetLight(
-		const GameSettings* gameSettings,
 		const Shader* const shader,
 		CustomCamera* const camera,
 		std::shared_ptr<Texture2D>& texture,

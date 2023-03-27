@@ -5,7 +5,7 @@
 class TrackBuilder
 {
 public:
-	TrackBuilder(const GameSettings* gameSettings, Track* track);
+	TrackBuilder(Track* track);
 
 	void BuildTrack(const Shader* const shader, CustomCamera* camera);
 
@@ -17,5 +17,4 @@ private:
 
 private:
 	Track* m_track;
-	const GameSettings* m_gameSettings;
 };

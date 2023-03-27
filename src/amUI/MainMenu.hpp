@@ -9,8 +9,6 @@
 
 #include "TextComponents/TextEngine.hpp"
 
-#include "amGame/GameSettings.hpp"
-
 class MainMenu : public Scene
 {
 public:
@@ -22,7 +20,7 @@ public:
 
 	void Init() override;
 
-	void UpdateGameSettings(GameSettings*);
+	void UpdateGameSettings();
 
 private:
 	void FrameStart() override;

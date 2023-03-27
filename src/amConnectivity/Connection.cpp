@@ -6,22 +6,40 @@ Client::Client(std::mutex& mutex, std::condition_variable& cv, std::string ip_ad
 	  resolver_(io_),
 	  m_ip_adress_string(ip_adress),
 	  m_port(port),
-	  mutex_(mutex),
+	  mutex_client(mutex),
 	  cv_(cv)
 {
 }
 
+void Client::UpdateClientParams(const glm::vec3& pos, const float& angleOrientation)
+{
+	if (mutex_client.try_lock())
+	{
+		client_params.x = pos.x;
+		client_params.y = pos.y;
+		client_params.z = pos.z;
+
+		client_params.angleOrientation = angleOrientation;
+
+		mutex_client.unlock();
+	}
+	else
+	{
+		return;
+	}
+}
+
 void Client::UpdatePositionAndDirection(glm::vec3& pos, float& angleOrientation) const
 {
-	if (mutex_.try_lock())
+	if (mutex_NPC.try_lock())
 	{
-		pos.x = params.x;
-		pos.y = params.y;
-		pos.z = params.z;
+		pos.x = npc_params.x;
+		pos.y = npc_params.y;
+		pos.z = npc_params.z;
 
-		angleOrientation = params.angleOrientation;
+		angleOrientation = npc_params.angleOrientation;
 
-		mutex_.unlock();
+		mutex_NPC.unlock();
 	}
 	else
 	{
@@ -53,10 +71,10 @@ void Client::handle_client()
 				throw boost::system::system_error(error);
 			}
 
-			if (length == sizeof(params))
+			if (length == sizeof(npc_params))
 			{
-				std::lock_guard<std::mutex> lock(mutex_);
-				memcpy_s(&params, sizeof(params), &data, length);
+				std::lock_guard<std::mutex> lock(mutex_NPC);
+				memcpy_s(&npc_params, sizeof(npc_params), &data, length);
 			}
 		}
 	}
@@ -88,7 +106,7 @@ void Client::wait_unitl_main_thread_ready()
 {
 	std::cout << "S-a creat clientul, acum asteptam deblocarea thread-ului..." << std::endl;
 
-	std::unique_lock<std::mutex> lock(mutex_);
+	std::unique_lock<std::mutex> lock(mutex_client);
 	cv_.wait(lock);
 
 	std::cout << "Thread-ul a fost deblocat, se continua executia..." << std::endl;

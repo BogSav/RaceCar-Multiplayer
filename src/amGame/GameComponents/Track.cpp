@@ -2,9 +2,7 @@
 
 #include <fstream>
 
-Track::Track(
-	const GameSettings* gameSettings)
-	: GameComponent(gameSettings)
+Track::Track() : GameComponent()
 {
 }
 
@@ -16,9 +14,7 @@ void Track::Render()
 	}
 }
 
-void Track::Render(
-	const glm::vec3& eyePosition,
-	const LightSourcesVector& lightingComponents)
+void Track::Render(const glm::vec3& eyePosition, const LightSourcesVector& lightingComponents)
 {
 	for (auto& geometry : m_geometries)
 	{

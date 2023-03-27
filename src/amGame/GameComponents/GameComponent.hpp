@@ -1,13 +1,11 @@
 #pragma once
 
-#include "amGame/GameSettings.hpp"
 #include "amGeometry/3dGeometries/3dGeometriesIncludes.hpp"
 
 class GameComponent
 {
 protected:
-	GameComponent() = delete;
-	GameComponent(const GameSettings* gameSettings) : m_gameSettings(gameSettings) {}
+	GameComponent() = default;
 
 public:
 	virtual void Update(float) { return; }
@@ -30,6 +28,4 @@ protected:
 	glm::vec3 m_scale = {1.f, 1.f, 1.f};
 
 	BBox m_bbox;
-
-	const GameSettings* m_gameSettings;
 };

@@ -8,7 +8,7 @@ class ScreenElements
 {
 public:
 	ScreenElements() = delete;
-	ScreenElements(const GameSettings* gameSettings, const Car* car)
+	ScreenElements(const Car* car)
 		: m_NDCSpace(-1.f, -1.f, 2.f, 2.f),
 		  m_logicSpace(
 			  0.f,
@@ -23,8 +23,8 @@ public:
 		m_transformMatrix = utils::VisualizationTransf2d(m_logicSpace, m_NDCSpace);
 
 		m_textEngine = std::make_shared<TextEngine>();
-		m_progressHandler = std::make_unique<ProgressHandler>(gameSettings, m_textEngine);
-		m_speedometer = std::make_unique<Speedometer>(gameSettings, m_textEngine);
+		m_progressHandler = std::make_unique<ProgressHandler>(m_textEngine);
+		m_speedometer = std::make_unique<Speedometer>(m_textEngine);
 
 		// Cereare shader si frameminimap
 		CreateShader();

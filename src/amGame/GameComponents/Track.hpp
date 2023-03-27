@@ -5,8 +5,7 @@
 class Track : public GameComponent
 {
 public:
-	Track() = delete;
-	Track(const GameSettings* gameSettings);
+	Track();
 
 	const std::vector<glm::vec3>& GetInteriorPoints() const { return m_trackPoints; };
 	const std::vector<glm::vec3>& GetExteriorPoints() const { return m_exteriorPoints; };

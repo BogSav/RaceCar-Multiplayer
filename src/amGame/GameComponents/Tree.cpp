@@ -1,13 +1,11 @@
 #include "Tree.hpp"
 
 Tree::Tree(
-	const GameSettings* gameSettings,
 	const Shader* const shader,
 	CustomCamera* const camera,
 	std::shared_ptr<Texture2D>& crownTexture,
 	std::shared_ptr<Texture2D>& trunkTexture)
 	: Tree(
-		gameSettings,
 		shader,
 		camera,
 		crownTexture,
@@ -19,7 +17,6 @@ Tree::Tree(
 }
 
 Tree::Tree(
-	const GameSettings* gameSettings,
 	const Shader* const shader,
 	CustomCamera* const camera,
 	std::shared_ptr<Texture2D>& crownTexture,
@@ -27,7 +24,7 @@ Tree::Tree(
 	std::string meshPath,
 	std::string trunkMeshName,
 	std::string crownMeshName)
-	: GameComponent(gameSettings)
+	: GameComponent()
 {
 	m_objects.emplace_back(new GeometryObject3d(shader, camera, meshPath, trunkMeshName));
 	m_objects.emplace_back(new GeometryObject3d(shader, camera, meshPath, crownMeshName));
