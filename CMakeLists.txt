@@ -26,6 +26,8 @@ custom_set_build_type()
 set(CMAKE_POLICY_DEFAULT_CMP0012 NEW)
 
 
+add_compile_definitions(_WIN32_WINNT=0x0601)
+
 # Find required packages
 find_package(OpenGL REQUIRED)
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")

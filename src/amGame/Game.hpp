@@ -18,8 +18,7 @@
 class Game : public gfxc::SimpleScene
 {
 public:
-	Game() = delete;
-	Game(Connection* client);
+	Game();
 	~Game();
 
 	void Init() override;
@@ -42,8 +41,6 @@ private:
 	void CreateTextures();
 
 private:
-	Connection* m_client;
-
 	std::unordered_map<std::string, std::shared_ptr<Texture2D>> m_textures;
 	std::unordered_map<std::string, std::unique_ptr<Shader>> m_shaders;
 

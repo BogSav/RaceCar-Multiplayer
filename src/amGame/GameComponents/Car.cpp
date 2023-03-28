@@ -6,9 +6,8 @@
 
 Car::Car(
 	const Shader* const shader,
-	std::shared_ptr<CustomCamera> camera,
-	Connection& client)
-	: BaseCar(shader, camera, client),
+	std::shared_ptr<CustomCamera> camera)
+	: BaseCar(shader, camera),
 	  m_distanceFromCamera(6.f),
 	  m_stirringAngularSpeed(RADIANS(45.f))
 {
@@ -85,6 +84,11 @@ void Car::Update(float deltaTime)
 		+ glm::vec3(0, 1, 0) - m_direction * 0.2f);
 
 	m_placeTracker->UpdateCurrentPositionOnTrack();
+
+	if (Connection* connection = Engine::GetConnection())
+	{
+		connection->UpdateClientParams(m_position, m_angleOrientation);
+	}
 
 	//std::cout << std::boolalpha << m_placeTracker->IsOutsideOfTrack() << std::endl;
 }

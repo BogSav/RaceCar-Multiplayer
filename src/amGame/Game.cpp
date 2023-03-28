@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-Game::Game(Connection* client) : m_client(client)
+Game::Game()
 {
 }
 
@@ -21,10 +21,12 @@ void Game::Init()
 	{
 		m_cameraAttachedToCar = std::make_shared<CustomCamera>();
 
-		m_car = std::make_unique<Car>(
-			m_shaders["SimpleShader"].get(), m_cameraAttachedToCar, *m_client);
-		npc = std::make_unique<NPCCar>(
-			m_shaders["SimpleShader"].get(), m_cameraAttachedToCar, *m_client);
+		m_car = std::make_unique<Car>(m_shaders["SimpleShader"].get(), m_cameraAttachedToCar);
+
+		if (Engine::GetConnection() != nullptr)
+		{
+			npc = std::make_unique<NPCCar>(m_shaders["SimpleShader"].get(), m_cameraAttachedToCar);
+		}
 	}
 
 	{
@@ -89,7 +91,10 @@ void Game::Render(float deltaTime)
 
 	m_track->Render();
 	m_car->Render();
-	npc->Render();
+	if (Engine::GetConnection() != nullptr)
+	{
+		npc->Render();
+	}
 	m_field->Render();
 
 	for (auto& streetLight : m_streetLights)
@@ -111,7 +116,11 @@ void Game::Render(float deltaTime)
 void Game::Update(float deltaTimeSeconds)
 {
 	m_car->Update(deltaTimeSeconds);
-	npc->Update(deltaTimeSeconds);
+
+	if (Engine::GetConnection() != nullptr)
+	{
+		npc->Update(deltaTimeSeconds);
+	}
 
 	m_screenElements->Update();
 	// std::cout << m_placeTracker->GetCurrentPositionAsPercent() << std::endl;

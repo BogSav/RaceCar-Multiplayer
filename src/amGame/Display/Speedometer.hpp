@@ -15,7 +15,7 @@ public:
 		m_background = std::make_unique<SemiCircle2d>(
 			glm::vec2{175.f, 0.f},
 			175.f,
-			16.f,
+			16,
 			Engine::GetGameSettings()->GetInGameDisplayParameters().tur_backgroundColor);
 		m_indicator = std::make_unique<Polygon2d>(
 			glm::vec2{-5.f, 0.f},

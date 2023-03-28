@@ -6,8 +6,8 @@
 class BaseCar : public GameComponent
 {
 protected:
-	BaseCar(const Shader* const shader, std::shared_ptr<CustomCamera> camera, Connection& client)
-		: GameComponent(), m_shader(shader), m_camera(camera), m_client(client){};
+	BaseCar(const Shader* const shader, std::shared_ptr<CustomCamera> camera)
+		: GameComponent(), m_shader(shader), m_camera(camera){};
 
 	void InitMesh()
 	{
@@ -17,8 +17,6 @@ protected:
 	}
 
 protected:
-	Connection& m_client;
-
 	const Shader* const m_shader;
 	std::shared_ptr<CustomCamera> m_camera;
 

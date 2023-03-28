@@ -5,7 +5,8 @@ Connection::Connection(std::string ip_adress, long port)
 	  socket_(io_),
 	  resolver_(io_),
 	  m_ip_adress_string(ip_adress),
-	  m_port(port)
+	  m_port(port),
+	  strand_(io_.get_executor())
 {
 }
 
@@ -18,8 +19,9 @@ void Connection::handle_client()
 		this->connect_to_server();
 
 		{
-			std::jthread receive(&Connection::handle_receive, this);
-			std::jthread send(&Connection::handle_send, this);
+			handle_receive();
+			handle_send();
+			std::jthread context([this]() { io_.run(); });
 		}
 
 		std::cout << "Se inchide conexiunea cu server-ul..." << std::endl;
@@ -32,40 +34,58 @@ void Connection::handle_client()
 
 void Connection::handle_receive()
 {
-	try
-	{
-		while (true)
-		{
-			boost::system::error_code error;
-			size_t length = socket_.read_some(boost::asio::buffer(data), error);
+	socket_.async_receive(
+		boost::asio::buffer(NPC_data_buffer, transferStructureSize),
+		boost::asio::bind_executor(
+			strand_,
+			[this](boost::system::error_code error, std::size_t length)
+			{
+				if (error == boost::asio::error::eof)
+				{
+					std::cout << "Client disconnected: "
+							  << socket_.remote_endpoint().address().to_string() << std::endl;
+				}
+				else if (error)
+				{
+					std::cout << "A aparut o eroare supicioasa si se inchide conexiunea"
+							  << error.what() << std::endl;
+					socket_.close();
+					return;
+				}
 
-			if (error == boost::asio::error::eof)
-			{
-				std::cout << "Client disconnected: "
-						  << socket_.remote_endpoint().address().to_string() << std::endl;
-				break;
-			}
-			else if (error)
-			{
-				throw boost::system::system_error(error);
-			}
+				if (length == transferStructureSize)
+				{
+					std::lock_guard<std::mutex> lock(mutex_NPC);
+					memcpy_s(&NPC_data, transferStructureSize, &NPC_data_buffer, length);
+				}
 
-			if (length == sizeof(TransferStructure))
-			{
-				std::lock_guard<std::mutex> lock(mutex_NPC);
-				memcpy_s(&NPC_data, sizeof(NPC_data), &data, length);
-			}
-		}
-	}
-	catch (std::exception& e)
-	{
-		throw e;
-	}
+				handle_receive();
+			}));
 }
 
 void Connection::handle_send()
 {
-	// BIG TODO
+	boost::asio::async_write(
+		socket_,
+		boost::asio::buffer(&getClientData(), transferStructureSize),
+		boost::asio::bind_executor(
+			strand_,
+			[this](boost::system::error_code error, std::size_t length)
+			{
+				if (error)
+				{
+					std::cout << "A aparut o eroare la trimitere" << error.what() << std::endl;
+					socket_.close();
+					return;
+				}
+
+				handle_send();
+			}));
+}
+
+void Connection::handle_deconnect()
+{
+	// TODO...
 }
 
 void Connection::connect_to_server()
@@ -74,8 +94,8 @@ void Connection::connect_to_server()
 	{
 		std::cout << "Se initiaza conexiunea cu serverul..." << std::endl;
 
-		endpoint = resolver_.resolve(m_ip_adress_string, std::to_string(m_port));
-		boost::asio::connect(socket_, endpoint);
+		endpoint_ = resolver_.resolve(m_ip_adress_string, std::to_string(m_port));
+		boost::asio::connect(socket_, endpoint_);
 
 		{
 			std::unique_lock<std::mutex> lock;
@@ -105,6 +125,12 @@ void Connection::wait_unitl_main_thread_ready()
 	std::cout << "Thread-ul a fost deblocat, se continua cu conexiunea..." << std::endl;
 }
 
+const Connection::TransferStructure& Connection::getClientData() const
+{
+	std::lock_guard<std::mutex> lock(mutex_client);
+	return client_data;
+}
+
 void Connection::UpdateClientParams(const glm::vec3& pos, const float& angleOrientation)
 {
 	if (mutex_client.try_lock())
@@ -123,7 +149,7 @@ void Connection::UpdateClientParams(const glm::vec3& pos, const float& angleOrie
 	}
 }
 
-void Connection::UpdatePositionAndDirection(glm::vec3& pos, float& angleOrientation) const
+void Connection::UpdateNPCParams(glm::vec3& pos, float& angleOrientation) const
 {
 	if (mutex_NPC.try_lock())
 	{

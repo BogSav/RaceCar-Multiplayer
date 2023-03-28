@@ -5,9 +5,12 @@
 
 #include <boost/array.hpp>
 #include <boost/asio.hpp>
+#include <boost/asio/strand.hpp>
+
 #include <iostream>
 #include <mutex>
 #include <thread>
+#include <memory_resource>
 
 using boost::asio::ip::tcp;
 
@@ -26,7 +29,7 @@ private:
 public:
 	Connection(std::string ip_adress = "192.168.0.186", long port = 25565);
 
-	void UpdatePositionAndDirection(glm::vec3& pos, float& angleOrientation) const;
+	void UpdateNPCParams(glm::vec3& pos, float& angleOrientation) const;
 	void UpdateClientParams(const glm::vec3& pos, const float& angleOrientation);
 
 	std::mutex& GetClientMutex() { return mutex_client; }
@@ -39,12 +42,16 @@ private:
 	void handle_client();
 	void handle_receive();
 	void handle_send();
-	void handle_deconnect(); // TODO
+	void handle_deconnect();
 
 	void connect_to_server();
 	void wait_unitl_main_thread_ready();
 
+	const TransferStructure& getClientData() const;
+
 private:
+	static constexpr std::size_t transferStructureSize = sizeof(TransferStructure);
+
 	std::string m_ip_adress_string;
 	long m_port;
 
@@ -54,11 +61,12 @@ private:
 	boost::asio::io_context io_;
 	tcp::socket socket_;
 	tcp::resolver resolver_;
-	tcp::resolver::results_type endpoint;
+	tcp::resolver::results_type endpoint_;
+	boost::asio::strand<boost::asio::io_context::executor_type> strand_;
 
-	boost::array<uint8_t, 1024> data;
+	boost::array<uint8_t, transferStructureSize> NPC_data_buffer;
 
-	std::mutex mutex_client;
+	mutable std::mutex mutex_client;
 	mutable std::mutex mutex_NPC;
 
 	std::condition_variable cv_;

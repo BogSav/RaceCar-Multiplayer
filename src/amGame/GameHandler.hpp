@@ -53,7 +53,7 @@ private:
 
 	void handle_game()
 	{
-		Scene* game = new Game(m_connection);
+		Scene* game = new Game();
 		game->Init();
 		game->Run();
 		delete game;
@@ -76,6 +76,8 @@ private:
 					cv_.wait(lock);
 				}
 			}
+
+			Engine::SetConnection(m_connection);
 		}
 	}
 

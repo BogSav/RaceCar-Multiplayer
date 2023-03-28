@@ -5,7 +5,7 @@
 class NPCCar : public BaseCar
 {
 public:
-	NPCCar(const Shader* const shader, std::shared_ptr<CustomCamera> camera, Connection& client);
+	NPCCar(const Shader* const shader, std::shared_ptr<CustomCamera> camera);
 
 	void Render() override;
 	void Render(CustomCamera* const camera, const Shader* const shader);
