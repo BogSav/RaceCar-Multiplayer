@@ -12,11 +12,10 @@
 #include <thread>
 #include <memory_resource>
 
-using boost::asio::ip::tcp;
-
 class Connection : public std::thread
 {
 private:
+	using tcp = boost::asio::ip::tcp;
 	struct TransferStructure
 	{
 		float x = 10;
