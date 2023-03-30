@@ -1,7 +1,6 @@
 #pragma once
 
 #include "GameComponent.hpp"
-#include "amConnectivity/Connection.hpp"
 
 class BaseCar : public GameComponent
 {

@@ -31,13 +31,16 @@ int main(int argc, char** argv)
 
 	srand((unsigned int)time(NULL));
 
-	Connection connection{};
-	GameHandler game(&connection, GetParentDir(std::string(argv[0])));
+	Connection* connection = new Connection{};
+	GameHandler game(connection, GetParentDir(std::string(argv[0])));
+
+	Engine::SetConnection(connection);
 
 	game.join();
-	connection.join();
+	connection->join();
+
+	delete connection;
 
 	//_CrtDumpMemoryLeaks();
-
 	return 0;
 }

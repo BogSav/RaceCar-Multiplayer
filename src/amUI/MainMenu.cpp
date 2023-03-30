@@ -44,28 +44,36 @@ void MainMenu::Init()
 
 	// Creare butoane
 	{
-		std::shared_ptr<Polygon2d> defaultRectangle =
+		auto defaultRectangle =
 			std::make_shared<Polygon2d>(glm::vec2{-1.f, -1.f}, 2.f, 2.f, Colors::Red, true);
+		auto textEngine = std::make_shared<TextEngine>();
 
-		m_goBackButton = std::make_unique<PolygonUIElement>(defaultRectangle, 150.f, 100.f, 50.f, 25.f);
-		m_goToChoseMenuButton = std::make_unique<PolygonUIElement>(
+		m_goBackButton = std::make_unique<RectangularButton>(
+			defaultRectangle, 150.f, 100.f, 50.f, 25.f, textEngine, "Go back");
+		m_goToChoseMenuButton = std::make_unique<RectangularButton>(
 			defaultRectangle,
 			window->GetResolution().x / 2.f,
 			window->GetResolution().y / 2.f,
 			100.f,
-			50.f);
-		m_singlePlayerChoseButton = std::make_unique<PolygonUIElement>(
+			50.f,
+			textEngine,
+			"Chose game mode");
+		m_singlePlayerChoseButton = std::make_unique<RectangularButton>(
 			defaultRectangle,
-			window->GetResolution().x / 15.f * 6.f,
+			window->GetResolution().x / 15.f * 5.f,
 			window->GetResolution().y / 2.f,
 			100.f,
-			50.f);
-		m_multiplayerChoseButton = std::make_unique<PolygonUIElement>(
+			50.f,
+			textEngine,
+			"Singleplayer");
+		m_multiplayerChoseButton = std::make_unique<RectangularButton>(
 			defaultRectangle,
-			window->GetResolution().x / 15.f * 9.f,
+			window->GetResolution().x / 15.f * 10.f,
 			window->GetResolution().y / 2.f,
 			100.f,
-			50.f);
+			50.f,
+			textEngine,
+			"Multiplayer");
 	}
 
 	// Creare state menu si mod initial
@@ -104,32 +112,22 @@ void MainMenu::Update(float deltaTime)
 
 void MainMenu::Render(float deltaTime)
 {
-	m_textEngine->Render("RaceCar Multiplayer", 330, 100, 3.f);
+	m_textEngine->Render("RaceCar Multiplayer", 330, 540, 3.f);
 
 	switch (m_currentMenuState)
 	{
 	case MenuStates::INITIAL_MENU:
 		m_goToChoseMenuButton->Render(m_shader, m_logicToNDCSpaceMatrix);
-		m_textEngine->Render(
-			"CHOSE GAME TYPE",
-			window->GetResolution().x / 2.f - 83.f,
-			window->GetResolution().y / 2.f);
 
 		break;
 	case MenuStates::CHOSE_GAME_TYPE_MENU:
 		m_goBackButton->Render(m_shader, m_logicToNDCSpaceMatrix);
-		m_textEngine->Render("GO BACK", 110, 615);
-
 		m_singlePlayerChoseButton->Render(m_shader, m_logicToNDCSpaceMatrix);
-		m_textEngine->Render("SINGLEPLAYER", 360, 355);
-
 		m_multiplayerChoseButton->Render(m_shader, m_logicToNDCSpaceMatrix);
-		m_textEngine->Render("MULTIPLAYER", 790, 355);
 
 		break;
 	case MenuStates::SINGLE_OR_MULTI_PLAYER_SPECIFIC_MENU:
 		m_goBackButton->Render(m_shader, m_logicToNDCSpaceMatrix);
-		m_textEngine->Render("GO BACK", 110, 615);
 
 		break;
 	}

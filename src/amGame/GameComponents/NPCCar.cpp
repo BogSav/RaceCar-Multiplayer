@@ -1,5 +1,7 @@
 #include "NPCCar.hpp"
 
+#include "amConnectivity/Connection.hpp"
+
 NPCCar::NPCCar(const Shader* const shader, std::shared_ptr<CustomCamera> camera)
 	: BaseCar(shader, camera)
 {

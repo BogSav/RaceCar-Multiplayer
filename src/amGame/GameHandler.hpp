@@ -76,8 +76,6 @@ private:
 					cv_.wait(lock);
 				}
 			}
-
-			Engine::SetConnection(m_connection);
 		}
 	}
 

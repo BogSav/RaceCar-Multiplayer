@@ -55,14 +55,14 @@ public:
 		m_textEngine->Render(
 			"Start",
 			Engine::GetGameSettings()->GetInGameDisplayParameters().progress_position.x - 2.5f,
-			Engine::GetGameSettings()->GetInGameDisplayParameters().progress_position.y + 35,
+			Engine::GetGameSettings()->GetInGameDisplayParameters().progress_position.y - 20,
 			1.0f,
 			Colors::LightGray);
 		m_textEngine->Render(
 			"Finish",
 			Engine::GetGameSettings()->GetInGameDisplayParameters().progress_position.x - 10.f,
 			Engine::GetGameSettings()->GetInGameDisplayParameters().progress_position.y
-				- Engine::GetGameSettings()->GetInGameDisplayParameters().progress_height - 5.f,
+				+ Engine::GetGameSettings()->GetInGameDisplayParameters().progress_height + 30.f,
 			1.0f,
 			Colors::LightGray);
 	}

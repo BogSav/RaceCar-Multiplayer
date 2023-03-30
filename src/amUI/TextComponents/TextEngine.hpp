@@ -26,22 +26,21 @@ public:
 		Color color = Colors::White)
 	{
 		m_textRenderer->RenderText(
-			text, posX, /*m_window->GetResolution().y -*/ posY, scale, color());
+			text, posX, Engine::GetWindow()->GetResolution().y - posY, scale, color());
 	}
 
 	glm::vec2 GetSizeOfText(const std::string& text, const float scale = 1.f)
 	{
-		glm::vec2 test{0, 0};
-
+		float width = 0.f;
+		float height = 0.f;
 		for (auto c = text.cbegin(); c != text.cend(); c++)
 		{
 			gfxc::Character ch = m_textRenderer->Characters[*c];
-
-			test.x += ch.Size.x * scale;
-			test.y = ch.Size.y * scale;
+			width += (ch.Advance >> 6) * scale;
+			height = std::max(height, static_cast<float>(ch.Size.y));
 		}
 
-		return test;
+		return {width, height};
 	}
 
 private:

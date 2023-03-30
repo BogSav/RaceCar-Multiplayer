@@ -39,31 +39,31 @@ public:
 		m_textEngine->Render(
 			"0",
 			22.f,
-			659.f,
+			61.f,
 			1.2f,
 			Engine::GetGameSettings()->GetInGameDisplayParameters().tur_numberingColor);
 		m_textEngine->Render(
 			"85",
 			66.f,
-			600.f,
+			120.f,
 			1.2f,
 			Engine::GetGameSettings()->GetInGameDisplayParameters().tur_numberingColor);
 		m_textEngine->Render(
 			"170",
 			153.f,
-			572.f,
+			148.f,
 			1.2f,
 			Engine::GetGameSettings()->GetInGameDisplayParameters().tur_numberingColor);
 		m_textEngine->Render(
 			"255",
 			236.f,
-			600.f,
+			120.f,
 			1.2f,
 			Engine::GetGameSettings()->GetInGameDisplayParameters().tur_numberingColor);
 		m_textEngine->Render(
 			"340",
 			296.f,
-			659.f,
+			61.f,
 			1.2f,
 			Engine::GetGameSettings()->GetInGameDisplayParameters().tur_numberingColor);
 
@@ -76,10 +76,10 @@ public:
 
 		// Render the speed
 		m_textEngine->Render(
-			std::to_string(static_cast<int>(std::round(m_speed))) + " km/h", 62.f, 695.f, 1.2f);
+			std::to_string(static_cast<int>(std::round(m_speed))) + " km/h", 62.f, 25.f, 1.2f);
 
 		// Render the current gear
-		m_textEngine->Render(m_speed == 0 ? "Liber" : std::to_string(m_gear), 218.f, 695.f, 1.2f);
+		m_textEngine->Render(m_speed == 0 ? "Liber" : std::to_string(m_gear), 218.f, 25.f, 1.2f);
 	}
 
 	void SetSpeed(const float& speed) { m_speed = speed; }

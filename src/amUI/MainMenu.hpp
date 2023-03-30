@@ -5,14 +5,11 @@
 #include "utils/glm_utils.h"
 #include "utils/math_utils.h"
 
-#include "UIElement.hpp"
-
-#include "TextComponents/TextEngine.hpp"
+#include "Button.hpp"
 
 class MainMenu : public Scene
 {
 public:
-	using RectangularButton = std::unique_ptr<PolygonUIElement>;
 	using GameMode = GameSettings::GameMode;
 
 	MainMenu();
@@ -34,6 +31,9 @@ private:
 	void OnMouseBtnPress(int mouseX, int mouseY, int button, int mods) override;
 
 private:
+	using RectangularButton = Button<Polygon2d>;
+	using RectangularButtonPtr = std::unique_ptr<RectangularButton>;
+
 	enum class MenuStates
 	{
 		INITIAL_MENU = 0,
@@ -54,10 +54,10 @@ private:
 	glm::mat3 m_logicToNDCSpaceMatrix;
 
 	// Butoanele
-	RectangularButton m_goBackButton;
-	RectangularButton m_goToChoseMenuButton;
-	RectangularButton m_singlePlayerChoseButton;
-	RectangularButton m_multiplayerChoseButton;
+	RectangularButtonPtr m_goBackButton;
+	RectangularButtonPtr m_goToChoseMenuButton;
+	RectangularButtonPtr m_singlePlayerChoseButton;
+	RectangularButtonPtr m_multiplayerChoseButton;
 
 	std::unique_ptr<GeometryObject2d> test;
 

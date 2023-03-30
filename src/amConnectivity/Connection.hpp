@@ -45,6 +45,8 @@ private:
 
 	void connect_to_server();
 	void wait_unitl_main_thread_ready();
+	void wait_until_npc_is_connected();
+	void unlock_main_thread();
 
 	const TransferStructure& getClientData() const;
 

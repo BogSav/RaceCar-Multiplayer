@@ -12,11 +12,13 @@ Connection::Connection(std::string ip_adress, long port)
 
 void Connection::handle_client()
 {
-	this->wait_unitl_main_thread_ready();
+	wait_unitl_main_thread_ready();
 
 	try
 	{
-		this->connect_to_server();
+		connect_to_server();
+		wait_until_npc_is_connected();
+		unlock_main_thread();
 
 		{
 			handle_receive();
@@ -97,12 +99,6 @@ void Connection::connect_to_server()
 		endpoint_ = resolver_.resolve(m_ip_adress_string, std::to_string(m_port));
 		boost::asio::connect(socket_, endpoint_);
 
-		{
-			std::unique_lock<std::mutex> lock;
-			connection_flag = true;
-			cv_.notify_one();
-		}
-
 		std::cout << "Conexiune realizata cu succes, se continua..." << std::endl;
 	}
 	catch (std::exception& e)
@@ -123,6 +119,32 @@ void Connection::wait_unitl_main_thread_ready()
 	}
 
 	std::cout << "Thread-ul a fost deblocat, se continua cu conexiunea..." << std::endl;
+}
+
+void Connection::wait_until_npc_is_connected()
+{
+	try
+	{
+		boost::asio::streambuf buf;
+		boost::system::error_code ec;
+		boost::asio::read_until(socket_, buf, "BEGIN_TRANSFER", ec);
+
+		if (ec)
+		{
+			std::cout << "A aparut o eroare in primirea mesajului de pornire transfer" << std::endl;
+		}
+	}
+	catch (std::exception& e)
+	{
+		throw e;
+	}
+}
+
+void Connection::unlock_main_thread()
+{
+	std::unique_lock<std::mutex> lock;
+	connection_flag = true;
+	cv_.notify_one();
 }
 
 const Connection::TransferStructure& Connection::getClientData() const
