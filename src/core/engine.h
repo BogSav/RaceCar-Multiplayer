@@ -12,8 +12,8 @@ public:
 	static WindowObject* Init(const WindowProperties& props);
 	static WindowObject* GetWindow();
 
-	static void SetGameSettings(GameSettings*);
-	static GameSettings* GetGameSettings();
+	static void SetGameSettings(class GameSettings*);
+	static class GameSettings* GetGameSettings();
 
 	static void SetConnection(class Connection*);
 	static class Connection* GetConnection();
@@ -25,6 +25,6 @@ public:
 
 private:
 	static WindowObject* window;
-	static GameSettings* settings;
+	static class GameSettings* settings;
 	static class Connection* connection;
 };

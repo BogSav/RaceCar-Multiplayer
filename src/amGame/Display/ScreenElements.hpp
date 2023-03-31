@@ -49,11 +49,13 @@ public:
 		//}
 	}
 
-	void Render() const
+	void Render(const float& deltaTime) const
 	{
 		m_speedometer->Render(m_shader.get(), m_transformMatrix, glm::mat3(1));
 		m_progressHandler->Render(m_shader.get(), m_transformMatrix, glm::mat3(1));
 
+		//if (Engine::GetGameSettings()->m_frameTimerEnabled && frameTimer.PassedTime(0.001f))
+		//	m_textEngine->Render(std::to_string(1.0f / deltaTime), 40, 600, 1.f, Colors::Cyan);
 		//m_textEngine->Render(
 		//	"Current lap: " + std::to_string(m_currentLap) + " / 5",
 		//	20,
@@ -104,6 +106,8 @@ private:
 	std::unique_ptr<ProgressHandler> m_progressHandler;
 
 	const Car* m_car;
+
+	mutable FTimer frameTimer;
 
 	int m_currentLap;
 	bool m_resetLap;

@@ -6,7 +6,7 @@
 #include "core/window/input_controller.h"
 #include "core/window/window_callbacks.h"
 
-#include "amGame/GameSettings.hpp"
+#include "utils/glm_utils.h"
 
 
 class WindowProperties

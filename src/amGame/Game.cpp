@@ -107,10 +107,13 @@ void Game::Render(float deltaTime)
 		tree->Render();
 	}
 
-	m_screenElements->Render();
+	m_screenElements->Render(deltaTime);
 
-	if (Engine::GetGameSettings()->m_frameTimerEnabled && frameTimer.PassedTime(0.1f))
-		std::cout << 1.f / deltaTime << std::endl;
+	//if (Engine::GetGameSettings()->m_forceFixedFramerate)
+	//	framerateTimer.SuspendThreadToSyncFramerate(deltaTime);
+
+	//if (Engine::GetGameSettings()->m_frameTimerEnabled)
+	//	std::cout << 1.f / deltaTime << std::endl;
 }
 
 void Game::Update(float deltaTimeSeconds)

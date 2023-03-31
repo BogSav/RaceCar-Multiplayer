@@ -1,6 +1,7 @@
 #include "TrackBuilder.hpp"
 
 #include "amUtilities/Utilities.hpp"
+#include "amGame/GameSettings.hpp"
 
 #include <fstream>
 

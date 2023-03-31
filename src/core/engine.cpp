@@ -6,7 +6,7 @@
 #include "utils/gl_utils.h"
 
 #include "amConnectivity/Connection.hpp"
-
+#include "amGame/GameSettings.hpp"
 
 WindowObject* Engine::window = nullptr;
 GameSettings* Engine::settings = nullptr;

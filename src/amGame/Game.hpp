@@ -59,6 +59,5 @@ private:
 	std::vector<std::unique_ptr<Tree>> m_trees;
 
 	std::unique_ptr<NPCCar> npc;
-
-	FTimer frameTimer;
+	ForcedFramerateTimer framerateTimer;
 };

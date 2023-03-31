@@ -181,6 +181,8 @@ public:
 	glm::ivec2 m_resolution;
 
 	bool m_frameTimerEnabled;
+	bool m_forceFixedFramerate;
+	float m_nrOfFramesPerSecondForFixedFramerate;
 
 private:
 	PhysicsParameters m_physicsParameters;

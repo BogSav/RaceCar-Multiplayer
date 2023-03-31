@@ -1,5 +1,7 @@
 #include "GameComponentPositionGenerator.hpp"
 
+#include "amGame/GameSettings.hpp"
+
 glm::vec3 PositionGenerator::GeneratePosition(
 	const Track* track, const bool aroundTrack, const size_t elementNr)
 {

@@ -5,6 +5,8 @@
 #include "utils/glm_utils.h"
 #include "utils/math_utils.h"
 
+#include "amGame/GameSettings.hpp"
+
 #include "Button.hpp"
 
 class MainMenu : public Scene

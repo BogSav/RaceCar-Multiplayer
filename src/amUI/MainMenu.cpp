@@ -97,7 +97,10 @@ void MainMenu::UpdateGameSettings()
 	gameSettings->m_nrOfPlayers = static_cast<int>(m_gameMode);
 
 	gameSettings->m_resolution = window->GetResolution();
-	gameSettings->m_frameTimerEnabled = false;
+	
+	gameSettings->m_frameTimerEnabled = true;
+	gameSettings->m_forceFixedFramerate = true;
+	gameSettings->m_nrOfFramesPerSecondForFixedFramerate = 60.f;
 }
 
 void MainMenu::FrameStart()
