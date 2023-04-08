@@ -1,5 +1,7 @@
 #include "amGame/Game.hpp"
 
+#include "amConnectivity/Connection.hpp"
+
 #include <iostream>
 
 Game::Game()
@@ -23,9 +25,11 @@ void Game::Init()
 
 		m_car = std::make_unique<Car>(m_shaders["SimpleShader"].get(), m_cameraAttachedToCar);
 
-		if (Engine::GetConnection() != nullptr)
+		for (auto& data : Engine::GetConnection()->SafeAccessNPCData())
 		{
-			npc = std::make_unique<NPCCar>(m_shaders["SimpleShader"].get(), m_cameraAttachedToCar);
+			if (Engine::GetConnection()->GetClientId() != data.clientId)
+				NPCs.emplace_back(std::make_unique<NPCCar>(
+					m_shaders["SimpleShader"].get(), m_cameraAttachedToCar, data.clientId));
 		}
 	}
 
@@ -91,11 +95,12 @@ void Game::Render(float deltaTime)
 
 	m_track->Render();
 	m_car->Render();
-	if (Engine::GetConnection() != nullptr)
+	m_field->Render();
+
+	for (auto& npc : NPCs)
 	{
 		npc->Render();
 	}
-	m_field->Render();
 
 	for (auto& streetLight : m_streetLights)
 	{
@@ -109,10 +114,10 @@ void Game::Render(float deltaTime)
 
 	m_screenElements->Render(deltaTime);
 
-	//if (Engine::GetGameSettings()->m_forceFixedFramerate)
+	// if (Engine::GetGameSettings()->m_forceFixedFramerate)
 	//	framerateTimer.SuspendThreadToSyncFramerate(deltaTime);
 
-	//if (Engine::GetGameSettings()->m_frameTimerEnabled)
+	// if (Engine::GetGameSettings()->m_frameTimerEnabled)
 	//	std::cout << 1.f / deltaTime << std::endl;
 }
 
@@ -120,7 +125,7 @@ void Game::Update(float deltaTimeSeconds)
 {
 	m_car->Update(deltaTimeSeconds);
 
-	if (Engine::GetConnection() != nullptr)
+	for (auto& npc : NPCs)
 	{
 		npc->Update(deltaTimeSeconds);
 	}

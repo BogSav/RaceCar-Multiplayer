@@ -1,7 +1,6 @@
-#include "Client.hpp"
-#include "Server.hpp"
+#include "src/Server.hpp"
 
-std::string ip_adress = "192.168.56.1";
+std::string ip_adress = "192.168.0.186";
 long port = 25565;
 
 int main()

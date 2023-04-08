@@ -1,4 +1,6 @@
 #include "Connection.hpp"
+#include "core/engine.h"
+#include "amGame/GameSettings.hpp"
 
 Connection::Connection(std::string ip_adress, long port)
 	: std::jthread(&Connection::handle_client, this),
@@ -16,13 +18,13 @@ Connection::~Connection()
 
 void Connection::handle_client()
 {
-	wait_unitl_main_thread_ready();
+	PauseConnection();
 
 	try
 	{
 		connect_to_server();
 		wait_until_npc_is_connected();
-		unlock_main_thread();
+		StartGame();
 
 		{
 			handle_receive();
@@ -41,7 +43,7 @@ void Connection::handle_client()
 void Connection::handle_receive()
 {
 	socket_.async_receive(
-		boost::asio::buffer(NPC_data_buffer, transferStructureSize),
+		boost::asio::buffer(&SafeAccessNPCData(), transferStructureSize * 2),
 		boost::asio::bind_executor(
 			strand_,
 			[this](boost::system::error_code error, std::size_t length)
@@ -59,11 +61,11 @@ void Connection::handle_receive()
 					return;
 				}
 
-				if (length == transferStructureSize)
-				{
-					std::lock_guard<std::mutex> lock(mutex_NPC);
-					memcpy_s(&NPC_data, transferStructureSize, &NPC_data_buffer, length);
-				}
+				//if (length == transferStructureSize)
+				//{
+				//	std::lock_guard<std::mutex> lock(mutex_NPC);
+				//	memcpy_s(&NPC_data, transferStructureSize, &NPC_data_buffer, length);
+				//}
 
 				handle_receive();
 			}));
@@ -73,7 +75,7 @@ void Connection::handle_send()
 {
 	boost::asio::async_write(
 		socket_,
-		boost::asio::buffer(&getClientData(), transferStructureSize),
+		boost::asio::buffer(&SafeAccessClientData(), transferStructureSize),
 		boost::asio::bind_executor(
 			strand_,
 			[this](boost::system::error_code error, std::size_t length)
@@ -112,23 +114,32 @@ void Connection::connect_to_server()
 	}
 }
 
-void Connection::wait_unitl_main_thread_ready()
+void Connection::PauseConnection()
 {
 	std::cout << "S-a creat clientul, acum asteptam deblocarea thread-ului..." << std::endl;
-
-	std::unique_lock<std::mutex> lock(mutex_client);
-	cv_.wait(lock, [this] { return multiplayer_flag; });
-
+	{
+		std::unique_lock<std::mutex> lock(mtx_);
+		cv_.wait(lock, [this] { return generic_flag; });
+		generic_flag = false;
+	}
 	std::cout << "Thread-ul a fost deblocat, se continua cu conexiunea..." << std::endl;
+}
+
+void Connection::StartGame()
+{
+	generic_flag = true;
+	cv_.notify_one();
 }
 
 void Connection::wait_until_npc_is_connected()
 {
 	try
 	{
-		boost::asio::streambuf buf;
 		boost::system::error_code ec;
-		boost::asio::read_until(socket_, buf, "BEGIN_TRANSFER", ec);
+		boost::asio::read(socket_, boost::asio::buffer(&initial_data, sizeof(initial_data)), ec);
+
+		clientId = initial_data.clientId;
+		Engine::GetGameSettings()->m_nrOfPlayers = initial_data.nrOfPlayers;
 
 		if (ec)
 		{
@@ -141,22 +152,21 @@ void Connection::wait_until_npc_is_connected()
 	}
 }
 
-void Connection::unlock_main_thread()
+std::vector<TransferStructure>& Connection::SafeAccessNPCData()
 {
-	std::unique_lock<std::mutex> lock;
-	connection_flag = true;
-	cv_.notify_one();
+	std::lock_guard<std::mutex> lock(mtx_);
+	return NPCs_data;
 }
 
-const Connection::TransferStructure& Connection::getClientData() const
+const TransferStructure& Connection::SafeAccessClientData() const
 {
-	std::lock_guard<std::mutex> lock(mutex_client);
+	std::lock_guard<std::mutex> lock(mtx_);
 	return client_data;
 }
 
 void Connection::UpdateClientParams(const glm::vec3& pos, const float& angleOrientation)
 {
-	if (mutex_client.try_lock())
+	if (mtx_.try_lock())
 	{
 		client_data.x = pos.x;
 		client_data.y = pos.y;
@@ -164,7 +174,7 @@ void Connection::UpdateClientParams(const glm::vec3& pos, const float& angleOrie
 
 		client_data.angleOrientation = angleOrientation;
 
-		mutex_client.unlock();
+		mtx_.unlock();
 	}
 	else
 	{
@@ -172,15 +182,28 @@ void Connection::UpdateClientParams(const glm::vec3& pos, const float& angleOrie
 	}
 }
 
-void Connection::UpdateNPCParams(glm::vec3& pos, float& angleOrientation) const
+void Connection::StartConnection()
+{
+	generic_flag = true;
+	cv_.notify_one();
+}
+
+void Connection::PauseGame()
+{
+	std::unique_lock<std::mutex> ulock(mtx_);
+	cv_.wait(ulock, [this] { return generic_flag; });
+}
+
+void Connection::UpdateNPCParams(
+	glm::vec3& pos, float& angleOrientation, const std::size_t& NPC_Id) const
 {
 	if (mutex_NPC.try_lock())
 	{
-		pos.x = NPC_data.x;
-		pos.y = NPC_data.y;
-		pos.z = NPC_data.z;
+		pos.x = NPCs_data[NPC_Id].x;
+		pos.y = NPCs_data[NPC_Id].y;
+		pos.z = NPCs_data[NPC_Id].z;
 
-		angleOrientation = NPC_data.angleOrientation;
+		angleOrientation = NPCs_data[NPC_Id].angleOrientation;
 
 		mutex_NPC.unlock();
 	}

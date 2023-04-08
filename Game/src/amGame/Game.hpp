@@ -57,7 +57,7 @@ private:
 	std::unique_ptr<Field> m_field;
 	std::vector<std::unique_ptr<StreetLight>> m_streetLights;
 	std::vector<std::unique_ptr<Tree>> m_trees;
+	std::vector<std::unique_ptr<NPCCar>> NPCs;
 
-	std::unique_ptr<NPCCar> npc;
 	ForcedFramerateTimer framerateTimer;
 };

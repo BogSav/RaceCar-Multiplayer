@@ -2,8 +2,8 @@
 
 #include "amConnectivity/Connection.hpp"
 
-NPCCar::NPCCar(const Shader* const shader, std::shared_ptr<CustomCamera> camera)
-	: BaseCar(shader, camera)
+NPCCar::NPCCar(const Shader* const shader, std::shared_ptr<CustomCamera> camera, std::size_t id)
+	: BaseCar(shader, camera), id(id)
 {
 	BaseCar::InitMesh();
 
@@ -41,7 +41,7 @@ void NPCCar::Render(CustomCamera* const camera, const Shader* const shader)
 
 void NPCCar::Update(float deltaTime)
 {
-	Engine::GetConnection()->UpdateNPCParams(m_position, m_angleOrientation);
+	Engine::GetConnection()->UpdateNPCParams(m_position, m_angleOrientation, id);
 	this->ComputeModelMatrix();
 }
 

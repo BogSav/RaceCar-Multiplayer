@@ -40,16 +40,16 @@ private:
 
 	void handle_menu()
 	{
-		Scene* mainMenu = new MainMenu();
+		MainMenu* mainMenu = new MainMenu();
 		mainMenu->Init();
 		mainMenu->Run();
-		dynamic_cast<MainMenu*>(mainMenu)->UpdateGameSettings();
+		mainMenu->UpdateGameSettings();
 		delete mainMenu;
 	}
 
 	void handle_game()
 	{
-		Scene* game = new Game();
+		Game* game = new Game();
 		game->Init();
 		game->Run();
 		delete game;
@@ -57,22 +57,11 @@ private:
 
 	void handle_multiplayer_if_needed()
 	{
-		//if (Engine::GetGameSettings()->m_isMultiplayer)
-		//{
-		//	{
-		//		std::lock_guard<std::mutex> lock(mutex_);
-		//		Engine::GetConnection()->SetMultiplayerFlag(true);
-		//		cv_.notify_one();
-		//	}
-
-		//	{
-		//		std::unique_lock<std::mutex> lock(mutex_);
-		//		while (!m_connection->GetConnectionFlag())
-		//		{
-		//			cv_.wait(lock);
-		//		}
-		//	}
-		//}
+		if (Engine::GetGameSettings()->m_isMultiplayer)
+		{
+			Engine::GetConnection()->StartConnection();
+			Engine::GetConnection()->PauseGame();
+		}
 	}
 
 private:

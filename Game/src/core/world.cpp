@@ -69,12 +69,12 @@ void Scene::ComputeFrameDeltaTime()
 
 	//lastFrameTime = currentTime;
 
-	if (elapsedTime < std::chrono::nanoseconds{ 166'666'666 })
-	{
-		std::this_thread::sleep_for(std::chrono::nanoseconds{166'666'666} - elapsedTime);
-	}
+	//if (elapsedTime < std::chrono::nanoseconds{ 166'666'666 })
+	//{
+	//	std::this_thread::sleep_for(std::chrono::nanoseconds{166'666'666} - elapsedTime);
+	//}
 
-	lastFrameTime = std::chrono::high_resolution_clock::now();
+	//lastFrameTime = std::chrono::high_resolution_clock::now();
 }
 
 

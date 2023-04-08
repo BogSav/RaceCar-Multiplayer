@@ -5,7 +5,7 @@
 class NPCCar : public BaseCar
 {
 public:
-	NPCCar(const Shader* const shader, std::shared_ptr<CustomCamera> camera);
+	NPCCar(const Shader* const shader, std::shared_ptr<CustomCamera> camera, std::size_t id);
 
 	void Render() override;
 	void Render(CustomCamera* const camera, const Shader* const shader);
@@ -14,4 +14,5 @@ public:
 
 private:
 	void ComputeModelMatrix();
+	const std::size_t id;
 };

@@ -1,11 +1,16 @@
 #include "Server.hpp"
 
-#include <boost/bind.hpp>
+#include <boost/bind/bind.hpp>
 
 Server::Server(boost::asio::io_context& io_, std::string ip_adress, long port)
-	: io_contex(io_),
-	  acceptor_(io_, tcp::endpoint(boost::asio::ip::address::from_string(ip_adress), port))
+	: io_contex_(io_),
+	  acceptor_(
+		  io_,
+		  tcp::endpoint(
+			  boost::asio::ip::address::from_string(ip_adress),
+			  static_cast<boost::asio::ip::port_type>(port)))
 {
+	std::cout << "Server initiat cu succes la adresa: " << ip_adress << " : " << port << "\n";
 }
 
 void Server::SetOnline()
@@ -13,19 +18,19 @@ void Server::SetOnline()
 	nr_clienti = 0;
 
 	start_accept();
-	io_contex.run();
+	io_contex_.run();
 }
 
 void Server::start_accept()
 {
-	std::cout << "Se asteapta un nou client" << std::endl;
+	std::cout << "Se asteapta un nou client..\n";
 
-	std::size_t id = nr_clienti.fetch_add(1);
-	Client::Ptr client = Client::create(io_contex, id, this);
+	std::size_t id = nr_clienti++;
+	Client::Ptr client = Client::create(io_contex_, id, this);
 
 	acceptor_.async_accept(
 		client->GetSocket(),
-		boost::bind(&Server::handle_accept, this, client, boost::asio::placeholders::error));
+		boost::bind(&Server::handle_accept, this, client, boost::placeholders::_1));
 }
 
 void Server::handle_accept(Client::Ptr client, const boost::system::error_code& error)
@@ -33,29 +38,46 @@ void Server::handle_accept(Client::Ptr client, const boost::system::error_code& 
 	if (!error)
 	{
 		{
-			std::lock_guard lock(mtx);
+			std::lock_guard lock(mtx_date_clienti_);
 			date_clienti.push_back(TransferStructure());
 		}
-		client->start();
+		client->Setup();
+	}
+	else
+	{
+		std::cout << "A aparut o eroare suspicioasa: " << error.what();
+		return;
 	}
 
-	start_accept();
+	if (nr_clienti == 2)
+	{
+		std::cout << "S-au conectat suficienti playeri..." << std::endl;
+		for (auto& client : clienti)
+		{
+			client->SetOnline();
+		}
+		std::cout << "Se opreste acceptarea de noi clienti\n";
+	}
+	else
+	{
+		start_accept();
+	}
 }
 
 std::vector<TransferStructure>& Server::SafeAccessDataVector()
 {
-	std::lock_guard<std::mutex> lock(mtx);
+	std::lock_guard<std::mutex> lock(mtx_date_clienti_);
 	return date_clienti;
 }
 
 void Server::SafeModifyElement(TransferStructure& client_data, std::size_t index)
 {
-	std::lock_guard<std::mutex> lock(mtx);
+	std::lock_guard<std::mutex> lock(mtx_date_clienti_);
 	date_clienti[index] = client_data;
 }
 
 void Server::SafeAddClient(Client::Ptr client)
 {
-	std::lock_guard<std::mutex> lock(mtx);
+	std::lock_guard<std::mutex> lock(mtx_clienti_);
 	clienti.push_back(client);
 }

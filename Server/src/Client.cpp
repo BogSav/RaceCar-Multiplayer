@@ -3,12 +3,12 @@
 #include "Server.hpp"
 
 #include <boost/asio/steady_timer.hpp>
-#include <boost/bind.hpp>
 
 Client::Client(boost::asio::io_context& io, std::size_t client_id, Server* server)
 	: socket_(io), strand_(io.get_executor()), client_id(client_id), server(server)
 {
 	client_data.clientId = static_cast<int>(client_id);
+	isOnline = false;
 }
 
 Client::Ptr Client::create(boost::asio::io_context& io_context, std::size_t id, Server* server)
@@ -16,16 +16,41 @@ Client::Ptr Client::create(boost::asio::io_context& io_context, std::size_t id, 
 	return Client::Ptr(new Client(io_context, id, server));
 }
 
-bool Client::start()
+void Client::Setup()
 {
 	server->SafeAddClient(shared_from_this());
+
+	std::cout << "Client nou conectat cu datele: \n";
+	std::cout << "--> ID: " << client_id << "\n";
+	std::cout << "--> Adresa: " << socket_.local_endpoint().address().to_string() << "\n";
+	std::cout << "--> Port: " << socket_.local_endpoint().port() << "\n\n";
 
 	handle_receive();
 	handle_send();
 
-	std::jthread context([this] { io_context_.run(); });
+	std::jthread j(
+		[this]
+		{
+			{
+				std::unique_lock<std::mutex> ulock(mtx);
+				cv_.wait(ulock, [this] { return isOnline; });
+			}
 
-	return true;
+
+			initial_data.clientId = client_id;
+			initial_data.nrOfPlayers = server->nr_clienti;
+			boost::asio::write(socket_, boost::asio::buffer(&initial_data, sizeof(initial_data)));
+
+			io_context_.run();
+		});
+}
+
+void Client::SetOnline()
+{
+	std::cout << "Clientul " << client_id << " este online\n";
+
+	isOnline = true;
+	cv_.notify_one();
 }
 
 void Client::handle_receive()

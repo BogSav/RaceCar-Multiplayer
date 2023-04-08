@@ -14,8 +14,10 @@ public:
 
 private:
 	tcp::acceptor acceptor_;
-	boost::asio::io_context& io_contex;
-	std::mutex mtx;
+	boost::asio::io_context& io_contex_;
+
+	std::mutex mtx_date_clienti_;
+	std::mutex mtx_clienti_;
 
 	std::vector<TransferStructure>& SafeAccessDataVector();
 	void SafeModifyElement(TransferStructure&, std::size_t);
