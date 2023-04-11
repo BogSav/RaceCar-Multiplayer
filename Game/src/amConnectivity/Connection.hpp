@@ -2,14 +2,7 @@
 
 #include "utils/glm_utils.h"
 #include "utils/math_utils.h"
-
-#include <boost/array.hpp>
-#include <boost/asio.hpp>
-#include <boost/asio/strand.hpp>
-#include <iostream>
-#include <memory_resource>
-#include <mutex>
-#include <thread>
+#include "SyncHelpper.hpp"
 
 struct TransferStructure
 {
@@ -34,14 +27,10 @@ private:
 	using tcp = boost::asio::ip::tcp;
 
 public:
-	Connection(std::string ip_adress = "192.168.0.186", long port = 25565);
+	Connection(SyncHelpper& syncHelpper, std::string ip_adress = "192.168.0.186", long port = 25565);
 
 	void UpdateNPCParams(glm::vec3& pos, float& angleOrientation, const std::size_t&) const;
 	void UpdateClientParams(const glm::vec3& pos, const float& angleOrientation);
-
-	// Pentru joc
-	void StartConnection();
-	void PauseGame();
 
 	std::size_t GetClientId() { return clientId; }
 	std::vector<TransferStructure>& SafeAccessNPCData();
@@ -57,9 +46,6 @@ private:
 
 	void connect_to_server();
 	void wait_until_npc_is_connected();
-
-	void PauseConnection();
-	void StartGame();
 
 private:
 	static constexpr std::size_t transferStructureSize = sizeof(TransferStructure);
@@ -79,7 +65,7 @@ private:
 	boost::asio::strand<boost::asio::io_context::executor_type> strand_;
 
 	mutable std::mutex mtx_;
-	mutable std::mutex mutex_NPC;
-	std::condition_variable cv_;
-	bool generic_flag = false;
+	mutable std::mutex mtx_npc;
+
+	SyncHelpper& syncHelpper;
 };

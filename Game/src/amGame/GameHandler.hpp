@@ -11,7 +11,7 @@
 class GameHandler
 {
 public:
-	GameHandler(std::string selfDirPath)
+	GameHandler(SyncHelpper& helper, std::string selfDirPath) : syncHelper(helper)
 	{
 		this->selfDirPath = selfDirPath;
 		handle_entierty();
@@ -59,11 +59,12 @@ private:
 	{
 		if (Engine::GetGameSettings()->m_isMultiplayer)
 		{
-			Engine::GetConnection()->StartConnection();
-			Engine::GetConnection()->PauseGame();
+			syncHelper.ResumeConnection();
+			syncHelper.PauseGame();
 		}
 	}
 
 private:
 	std::string selfDirPath;
+	SyncHelpper& syncHelper;
 };

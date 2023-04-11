@@ -94,7 +94,6 @@ void MainMenu::UpdateGameSettings()
 
 	gameSettings->m_isMultiplayer = m_gameMode == GameMode::MULTIPLAYER;
 	gameSettings->m_gameMode = m_gameMode;
-	gameSettings->m_nrOfPlayers = static_cast<int>(m_gameMode);
 
 	gameSettings->m_resolution = window->GetResolution();
 	

@@ -67,7 +67,7 @@ void Scene::ComputeFrameDeltaTime()
 	
 	deltaTime = elapsedTime.count() / 1e+9;
 
-	//lastFrameTime = currentTime;
+	lastFrameTime = currentTime;
 
 	//if (elapsedTime < std::chrono::nanoseconds{ 166'666'666 })
 	//{

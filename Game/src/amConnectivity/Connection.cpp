@@ -1,15 +1,19 @@
 #include "Connection.hpp"
-#include "core/engine.h"
-#include "amGame/GameSettings.hpp"
 
-Connection::Connection(std::string ip_adress, long port)
+#include "amGame/GameSettings.hpp"
+#include "core/engine.h"
+
+Connection::Connection(SyncHelpper& syncHelpper, std::string ip_adress, long port)
 	: std::jthread(&Connection::handle_client, this),
 	  socket_(io_),
 	  resolver_(io_),
 	  m_ip_adress_string(ip_adress),
 	  m_port(port),
-	  strand_(io_.get_executor())
+	  strand_(io_.get_executor()),
+	  syncHelpper(syncHelpper)
 {
+	NPCs_data.push_back(TransferStructure());
+	NPCs_data.push_back(TransferStructure());
 }
 
 Connection::~Connection()
@@ -18,16 +22,15 @@ Connection::~Connection()
 
 void Connection::handle_client()
 {
-	PauseConnection();
+	syncHelpper.PauseConnection();
 
 	try
 	{
 		connect_to_server();
 		wait_until_npc_is_connected();
-		StartGame();
+		syncHelpper.ResumeGame();
 
 		{
-			handle_receive();
 			handle_send();
 			std::jthread context([this]() { io_.run(); });
 		}
@@ -61,13 +64,13 @@ void Connection::handle_receive()
 					return;
 				}
 
-				//if (length == transferStructureSize)
+				// if (length == transferStructureSize)
 				//{
 				//	std::lock_guard<std::mutex> lock(mutex_NPC);
 				//	memcpy_s(&NPC_data, transferStructureSize, &NPC_data_buffer, length);
-				//}
+				// }
 
-				handle_receive();
+				handle_send();
 			}));
 }
 
@@ -87,7 +90,7 @@ void Connection::handle_send()
 					return;
 				}
 
-				handle_send();
+				handle_receive();
 			}));
 }
 
@@ -114,36 +117,26 @@ void Connection::connect_to_server()
 	}
 }
 
-void Connection::PauseConnection()
-{
-	std::cout << "S-a creat clientul, acum asteptam deblocarea thread-ului..." << std::endl;
-	{
-		std::unique_lock<std::mutex> lock(mtx_);
-		cv_.wait(lock, [this] { return generic_flag; });
-		generic_flag = false;
-	}
-	std::cout << "Thread-ul a fost deblocat, se continua cu conexiunea..." << std::endl;
-}
-
-void Connection::StartGame()
-{
-	generic_flag = true;
-	cv_.notify_one();
-}
-
 void Connection::wait_until_npc_is_connected()
 {
 	try
 	{
 		boost::system::error_code ec;
-		boost::asio::read(socket_, boost::asio::buffer(&initial_data, sizeof(initial_data)), ec);
 
-		clientId = initial_data.clientId;
-		Engine::GetGameSettings()->m_nrOfPlayers = initial_data.nrOfPlayers;
+		boost::asio::streambuf buf;
+		boost::asio::read_until(socket_, buf, "BEGIN", ec);
 
 		if (ec)
 		{
 			std::cout << "A aparut o eroare in primirea mesajului de pornire transfer" << std::endl;
+		}
+		else
+		{
+			boost::asio::read(
+				socket_, boost::asio::buffer(&initial_data, sizeof(initial_data)), ec);
+
+			clientId = initial_data.clientId;
+			Engine::GetGameSettings()->m_nrOfPlayers = initial_data.nrOfPlayers;
 		}
 	}
 	catch (std::exception& e)
@@ -182,22 +175,10 @@ void Connection::UpdateClientParams(const glm::vec3& pos, const float& angleOrie
 	}
 }
 
-void Connection::StartConnection()
-{
-	generic_flag = true;
-	cv_.notify_one();
-}
-
-void Connection::PauseGame()
-{
-	std::unique_lock<std::mutex> ulock(mtx_);
-	cv_.wait(ulock, [this] { return generic_flag; });
-}
-
 void Connection::UpdateNPCParams(
 	glm::vec3& pos, float& angleOrientation, const std::size_t& NPC_Id) const
 {
-	if (mutex_NPC.try_lock())
+	if (mtx_npc.try_lock())
 	{
 		pos.x = NPCs_data[NPC_Id].x;
 		pos.y = NPCs_data[NPC_Id].y;
@@ -205,7 +186,7 @@ void Connection::UpdateNPCParams(
 
 		angleOrientation = NPCs_data[NPC_Id].angleOrientation;
 
-		mutex_NPC.unlock();
+		mtx_npc.unlock();
 	}
 	else
 	{

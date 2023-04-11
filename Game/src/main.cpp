@@ -31,14 +31,16 @@ int main(int argc, char** argv)
 
 	srand((unsigned int)time(NULL));
 
-	Connection* connection = new Connection{};
+	SyncHelpper helper;
+
+	Connection* connection = new Connection{helper, "192.168.0.192", 25565};
 
 	Engine::SetConnection(connection);
 	Engine::SetGameSettings(new GameSettings());
 
-	GameHandler* gameHandler = new GameHandler(GetParentDir(std::string(argv[0])));
+	GameHandler* gameHandler = new GameHandler(helper, GetParentDir(std::string(argv[0])));
 
-	connection->join();
+	//connection->join();
 
 	delete gameHandler;
 	delete connection;

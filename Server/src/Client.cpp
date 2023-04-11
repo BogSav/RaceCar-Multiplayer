@@ -5,9 +5,12 @@
 #include <boost/asio/steady_timer.hpp>
 
 Client::Client(boost::asio::io_context& io, std::size_t client_id, Server* server)
-	: socket_(io), strand_(io.get_executor()), client_id(client_id), server(server)
+	: socket_(io),
+	  strand_(io.get_executor()),
+	  client_id(client_id),
+	  server(server),
+	  data(server->data)
 {
-	client_data.clientId = static_cast<int>(client_id);
 	isOnline = false;
 }
 
@@ -18,7 +21,7 @@ Client::Ptr Client::create(boost::asio::io_context& io_context, std::size_t id, 
 
 void Client::Setup()
 {
-	server->SafeAddClient(shared_from_this());
+	server->clienti.push_back(shared_from_this());
 
 	std::cout << "Client nou conectat cu datele: \n";
 	std::cout << "--> ID: " << client_id << "\n";
@@ -26,7 +29,7 @@ void Client::Setup()
 	std::cout << "--> Port: " << socket_.local_endpoint().port() << "\n\n";
 
 	handle_receive();
-	handle_send();
+	// handle_send();
 
 	std::jthread j(
 		[this]
@@ -36,10 +39,7 @@ void Client::Setup()
 				cv_.wait(ulock, [this] { return isOnline; });
 			}
 
-
-			initial_data.clientId = client_id;
-			initial_data.nrOfPlayers = server->nr_clienti;
-			boost::asio::write(socket_, boost::asio::buffer(&initial_data, sizeof(initial_data)));
+			handle_initial_data();
 
 			io_context_.run();
 		});
@@ -56,7 +56,7 @@ void Client::SetOnline()
 void Client::handle_receive()
 {
 	socket_.async_receive(
-		boost::asio::buffer(buffer, structureSize),
+		boost::asio::buffer(buffer, DataBuffer::dataSize),
 		boost::asio::bind_executor(
 			strand_,
 			[this](boost::system::error_code error, std::size_t length)
@@ -74,13 +74,12 @@ void Client::handle_receive()
 					return;
 				}
 
-				if (length == structureSize)
+				if (length == DataBuffer::dataSize)
 				{
-					memcpy_s(&client_data, structureSize, &buffer, length);
-					server->SafeModifyElement(client_data, client_id);
+					data.UpdateElement(buffer, client_id);
 				}
 
-				handle_receive();
+				handle_send();
 			}));
 }
 
@@ -88,7 +87,7 @@ void Client::handle_send()
 {
 	boost::asio::async_write(
 		socket_,
-		boost::asio::buffer(&server->SafeAccessDataVector(), structureSize * server->nr_clienti),
+		boost::asio::buffer(&data.GetDataVector(), DataBuffer::dataSize * 2),
 		boost::asio::bind_executor(
 			strand_,
 			[this](boost::system::error_code error, std::size_t length)
@@ -100,6 +99,24 @@ void Client::handle_send()
 					return;
 				}
 
-				handle_send();
+				handle_receive();
 			}));
+}
+
+void Client::handle_initial_data()
+{
+	try
+	{
+		std::string st = "BEGIN";
+		boost::asio::write(socket_, boost::asio::buffer(st));
+
+		InitialDataStructure init_data;
+		init_data.clientId = client_id;
+		init_data.nrOfPlayers = server->nr_clienti;
+		boost::asio::write(socket_, boost::asio::buffer(&init_data, sizeof(init_data)));
+	}
+	catch (std::exception& e)
+	{
+		throw e;
+	}
 }
