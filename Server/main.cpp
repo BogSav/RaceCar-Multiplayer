@@ -1,6 +1,6 @@
 #include "src/Server.hpp"
 
-std::string ip_adress = "192.168.0.186";
+std::string ip_adress = "192.168.0.192";
 long port = 25565;
 
 int main()
@@ -10,6 +10,8 @@ int main()
 	{
 		Server server(io, ip_adress, port);
 		server.SetOnline();
+		while (true)
+			;
 	}
 	catch (std::exception& e)
 	{

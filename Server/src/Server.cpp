@@ -48,7 +48,7 @@ void Server::handle_accept(Client::Ptr client, const boost::system::error_code& 
 		return;
 	}
 
-	if (nr_clienti == 2)
+	if (nr_clienti == 1)
 	{
 		std::cout << "S-au conectat suficienti playeri..." << std::endl;
 		for (auto& client : clienti)

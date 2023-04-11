@@ -14,7 +14,7 @@ public:
 	typedef std::shared_ptr<Client> Ptr;
 	using tcp = boost::asio::ip::tcp;
 
-	static Ptr create(boost::asio::io_context& io_context, std::size_t, class Server*);
+	static Ptr create(boost::asio::io_context& c, std::size_t, class Server*);
 	boost::asio::ip::tcp::socket& GetSocket() { return socket_; }
 	void Setup();
 	void SetOnline();
@@ -25,7 +25,7 @@ private:
 		std::size_t nrOfPlayers = 0;
 		std::size_t clientId = 0;
 	};
-	Client(boost::asio::io_context& io, std::size_t, class Server*);
+	Client(boost::asio::io_context& c, std::size_t, class Server*);
 	void handle_receive();
 	void handle_send();
 	void handle_initial_data();
@@ -44,4 +44,6 @@ private:
 
 	class Server* server;
 	DataBuffer& data;
+
+	std::jthread j;
 };

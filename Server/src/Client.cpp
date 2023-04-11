@@ -3,10 +3,12 @@
 #include "Server.hpp"
 
 #include <boost/asio/steady_timer.hpp>
+#include <boost/bind.hpp>
 
-Client::Client(boost::asio::io_context& io, std::size_t client_id, Server* server)
-	: socket_(io),
-	  strand_(io.get_executor()),
+Client::Client(boost::asio::io_context& c, std::size_t client_id, Server* server)
+	: io_context_(),
+	  socket_(c),
+	  strand_(io_context_.get_executor()),
 	  client_id(client_id),
 	  server(server),
 	  data(server->data)
@@ -14,9 +16,9 @@ Client::Client(boost::asio::io_context& io, std::size_t client_id, Server* serve
 	isOnline = false;
 }
 
-Client::Ptr Client::create(boost::asio::io_context& io_context, std::size_t id, Server* server)
+Client::Ptr Client::create(boost::asio::io_context& c, std::size_t id, Server* server)
 {
-	return Client::Ptr(new Client(io_context, id, server));
+	return Client::Ptr(new Client(c, id, server));
 }
 
 void Client::Setup()
@@ -28,20 +30,27 @@ void Client::Setup()
 	std::cout << "--> Adresa: " << socket_.local_endpoint().address().to_string() << "\n";
 	std::cout << "--> Port: " << socket_.local_endpoint().port() << "\n\n";
 
-	handle_receive();
-	// handle_send();
+	handle_initial_data();
 
-	std::jthread j(
+	handle_receive();
+
+	j = std::jthread(
 		[this]
 		{
 			{
 				std::unique_lock<std::mutex> ulock(mtx);
 				cv_.wait(ulock, [this] { return isOnline; });
 			}
+			try
+			{
+				io_context_.run();
 
-			handle_initial_data();
-
-			io_context_.run();
+				socket_.close();
+			}
+			catch (std::exception& e)
+			{
+				std::cerr << e.what();
+			}
 		});
 }
 
@@ -79,7 +88,7 @@ void Client::handle_receive()
 					data.UpdateElement(buffer, client_id);
 				}
 
-				handle_send();
+				handle_receive();
 			}));
 }
 
