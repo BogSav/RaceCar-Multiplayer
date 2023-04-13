@@ -27,12 +27,10 @@ private:
 	};
 	Client(boost::asio::io_context& c, std::size_t, class Server*);
 	void handle_receive();
-	void handle_send();
+	void handle_send(boost::system::error_code&);
 	void handle_initial_data();
 
 private:
-	boost::asio::io_context io_context_;
-	boost::asio::strand<boost::asio::io_context::executor_type> strand_;
 	tcp::socket socket_;
 	boost::array<std::uint8_t, DataBuffer::dataSize> buffer;
 

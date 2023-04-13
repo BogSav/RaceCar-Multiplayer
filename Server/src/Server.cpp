@@ -28,7 +28,10 @@ void Server::start_accept()
 
 	std::size_t id = nr_clienti++;
 
+#ifdef USE_VECTOR
 	data.CreateNewElement(id);
+#endif
+
 	Client::Ptr client = Client::create(io_contex_, id, this);
 
 	acceptor_.async_accept(

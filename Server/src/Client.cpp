@@ -6,12 +6,7 @@
 #include <boost/bind.hpp>
 
 Client::Client(boost::asio::io_context& c, std::size_t client_id, Server* server)
-	: io_context_(),
-	  socket_(c),
-	  strand_(io_context_.get_executor()),
-	  client_id(client_id),
-	  server(server),
-	  data(server->data)
+	: socket_(c), client_id(client_id), server(server), data(server->data)
 {
 	isOnline = false;
 }
@@ -30,10 +25,6 @@ void Client::Setup()
 	std::cout << "--> Adresa: " << socket_.local_endpoint().address().to_string() << "\n";
 	std::cout << "--> Port: " << socket_.local_endpoint().port() << "\n\n";
 
-	handle_initial_data();
-
-	handle_receive();
-
 	j = std::jthread(
 		[this]
 		{
@@ -43,7 +34,8 @@ void Client::Setup()
 			}
 			try
 			{
-				io_context_.run();
+				handle_initial_data();
+				handle_receive();
 
 				socket_.close();
 			}
@@ -64,52 +56,45 @@ void Client::SetOnline()
 
 void Client::handle_receive()
 {
-	socket_.async_receive(
-		boost::asio::buffer(buffer, DataBuffer::dataSize),
-		boost::asio::bind_executor(
-			strand_,
-			[this](boost::system::error_code error, std::size_t length)
-			{
-				if (error == boost::asio::error::eof)
-				{
-					std::cout << "Client disconnected: "
-							  << socket_.remote_endpoint().address().to_string() << std::endl;
-				}
-				else if (error)
-				{
-					std::cout << "A aparut o eroare supicioasa si se inchide conexiunea"
-							  << error.what() << std::endl;
-					socket_.close();
-					return;
-				}
+	boost::system::error_code error;
+	while (true)
+	{
+		size_t length = socket_.read_some(boost::asio::buffer(buffer), error);
 
-				if (length == DataBuffer::dataSize)
-				{
-					data.UpdateElement(buffer, client_id);
-				}
+		if (error == boost::asio::error::eof)
+		{
+			std::cout << "Client disconnected: " << socket_.remote_endpoint().address().to_string()
+					  << std::endl;
+			break;
+		}
+		else if (error)
+		{
+			throw boost::system::system_error(error);
+		}
 
-				handle_receive();
-			}));
+		if (length == DataBuffer::dataSize)
+		{
+			data.UpdateElement(buffer, client_id);
+			std::cout << "Primit ok\n";
+		}
+		else
+		{
+			std::cout << "Ce drq s-a trimis??" << length << "\n";
+		}
+
+		handle_send(error);
+	}
 }
 
-void Client::handle_send()
+void Client::handle_send(boost::system::error_code& error)
 {
-	boost::asio::async_write(
-		socket_,
-		boost::asio::buffer(&data.GetDataVector(), DataBuffer::dataSize * 2),
-		boost::asio::bind_executor(
-			strand_,
-			[this](boost::system::error_code error, std::size_t length)
-			{
-				if (error)
-				{
-					std::cout << "A aparut o eroare la trimitere" << error.what() << std::endl;
-					socket_.close();
-					return;
-				}
+	boost::asio::write(
+		socket_, boost::asio::buffer(&data.GetDataVector(), DataBuffer::dataSize * 2), error);
 
-				handle_receive();
-			}));
+	if (error)
+	{
+		std::cerr << "Eroare las trimitere client " << client_id << " " << error.what();
+	}
 }
 
 void Client::handle_initial_data()
