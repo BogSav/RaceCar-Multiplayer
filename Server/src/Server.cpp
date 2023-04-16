@@ -1,6 +1,7 @@
 #include "Server.hpp"
 
 #include <boost/bind/bind.hpp>
+#include <iostream>
 
 Server::Server(boost::asio::io_context& io_, std::string ip_adress, long port)
 	: io_contex_(io_),
@@ -8,8 +9,7 @@ Server::Server(boost::asio::io_context& io_, std::string ip_adress, long port)
 		  io_,
 		  tcp::endpoint(
 			  boost::asio::ip::address::from_string(ip_adress),
-			  static_cast<boost::asio::ip::port_type>(port))),
-	  data(2)
+			  static_cast<boost::asio::ip::port_type>(port)))
 {
 	std::cout << "Server initiat cu succes la adresa: " << ip_adress << " : " << port << "\n";
 }
@@ -27,11 +27,6 @@ void Server::start_accept()
 	std::cout << "Se asteapta un nou client..\n";
 
 	std::size_t id = nr_clienti++;
-
-#ifdef USE_VECTOR
-	data.CreateNewElement(id);
-#endif
-
 	Client::Ptr client = Client::create(io_contex_, id, this);
 
 	acceptor_.async_accept(
@@ -51,13 +46,15 @@ void Server::handle_accept(Client::Ptr client, const boost::system::error_code& 
 		return;
 	}
 
-	if (nr_clienti == 1)
+	if (nr_clienti == maxNumberOfClients)
 	{
 		std::cout << "S-au conectat suficienti playeri..." << std::endl;
+
 		for (auto& client : clienti)
 		{
 			client->SetOnline();
 		}
+
 		std::cout << "Se opreste acceptarea de noi clienti\n";
 	}
 	else

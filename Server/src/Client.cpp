@@ -1,85 +1,99 @@
 ﻿#include "Client.hpp"
 
+#include "SerializationHelper.hpp"
 #include "Server.hpp"
 
-#include <boost/asio/steady_timer.hpp>
-#include <boost/bind.hpp>
+#include <mutex>
+#include <thread>
+#include <iostream>
 
-Client::Client(boost::asio::io_context& c, std::size_t client_id, Server* server)
-	: socket_(c), client_id(client_id), server(server), data(server->data)
+
+Client::Client(boost::asio::io_context& context, std::size_t client_id, Server* server)
+	: socket_(context), clientId_(client_id), server_(server)
 {
-	isOnline = false;
+	isOnline_ = false;
 }
 
-Client::Ptr Client::create(boost::asio::io_context& c, std::size_t id, Server* server)
+Client::Ptr Client::create(boost::asio::io_context& context, std::size_t id, Server* server)
 {
-	return Client::Ptr(new Client(c, id, server));
+	return Client::Ptr(new Client(context, id, server));
 }
 
 void Client::Setup()
 {
-	server->clienti.push_back(shared_from_this());
+	server_->clienti.push_back(shared_from_this());
 
-	std::cout << "Client nou conectat cu datele: \n";
-	std::cout << "--> ID: " << client_id << "\n";
-	std::cout << "--> Adresa: " << socket_.local_endpoint().address().to_string() << "\n";
-	std::cout << "--> Port: " << socket_.local_endpoint().port() << "\n\n";
+	std::cerr << "=========================================\n";
+	std::cerr << "Client nou conectat cu datele: \n";
+	std::cerr << "--> ID: " << clientId_ << "\n";
+	std::cerr << "--> Adresa: " << socket_.local_endpoint().address().to_string() << "\n";
+	std::cerr << "--> Port: " << socket_.local_endpoint().port() << "\n";
+	std::cerr << "=========================================\n";
 
-	j = std::jthread(
+	jThread = std::jthread(
 		[this]
 		{
 			{
-				std::unique_lock<std::mutex> ulock(mtx);
-				cv_.wait(ulock, [this] { return isOnline; });
+				// Se asteapta pornirea clientului
+				std::unique_lock<std::mutex> ulock(mtx_);
+				cv_.wait(ulock, [this] { return isOnline_; });
 			}
 			try
 			{
 				handle_initial_data();
 				handle_receive();
 
+				isOnline_ = false;
 				socket_.close();
 			}
 			catch (std::exception& e)
 			{
 				std::cerr << e.what();
+
+				isOnline_ = false;
+				socket_.close();
 			}
 		});
 }
 
 void Client::SetOnline()
 {
-	std::cout << "Clientul " << client_id << " este online\n";
+	std::cerr << "Clientul " << clientId_ << " este online\n";
 
-	isOnline = true;
+	isOnline_ = true;
 	cv_.notify_one();
 }
 
 void Client::handle_receive()
 {
 	boost::system::error_code error;
+	std::vector<char> serializedData;
+
 	while (true)
 	{
-		size_t length = socket_.read_some(boost::asio::buffer(buffer), error);
+		size_t length = socket_.read_some(boost::asio::buffer(serializedData), error);
 
-		if (error == boost::asio::error::eof)
+		if (error)
 		{
-			std::cout << "Client disconnected: " << socket_.remote_endpoint().address().to_string()
-					  << std::endl;
-			break;
-		}
-		else if (error)
-		{
+			std::cerr << "A aparut o eroare de primire la clientul " << clientId_ << "\n";
+			if (error == boost::asio::error::eof)
+			{
+				std::cerr << "Este posibil ca clientul " << clientId_ << " sa se fii deconectat\n";
+			}
 			throw boost::system::system_error(error);
 		}
 
-		if (length == DataBuffer::dataSize)
+		if (length == clientDataSize)
 		{
-			data.UpdateElement(buffer, client_id);
-			std::cout << "Primit ok\n";
+			server_->dateClienti[clientId_] = SerializationHelper::DeserializeClientData(
+				std::string(serializedData.begin(), serializedData.end()));
 		}
 		else
 		{
-			std::cout << "Ce drq s-a trimis??" << length << "\n";
+			std::cerr << "S-a trimis ceva ce nu trebuia probabil, cu lungimea asta: " << length
+					  << "\n";
+			throw std::runtime_error(
+				"Clientul " + std::to_string(clientId_) + " a primit un mesaj extra dubios");
 		}
 
 		handle_send(error);
@@ -88,29 +102,38 @@ void Client::handle_receive()
 
 void Client::handle_send(boost::system::error_code& error)
 {
-	boost::asio::write(
-		socket_, boost::asio::buffer(&data.GetDataVector(), DataBuffer::dataSize * 2), error);
+	std::string serializedData = SerializationHelper::SerializeDataArray(server_->dateClienti);
+	boost::asio::write(socket_, boost::asio::buffer(boost::asio::buffer(serializedData)), error);
 
 	if (error)
 	{
-		std::cerr << "Eroare las trimitere client " << client_id << " " << error.what();
+		std::cerr << "A aparut o eroare de trimitere la clientul " << clientId_ << "\n";
+		throw boost::system::system_error(error);
 	}
 }
 
 void Client::handle_initial_data()
 {
-	try
-	{
-		std::string st = "BEGIN";
-		boost::asio::write(socket_, boost::asio::buffer(st));
+	boost::system::error_code error;
 
-		InitialDataStructure init_data;
-		init_data.clientId = client_id;
-		init_data.nrOfPlayers = server->nr_clienti;
-		boost::asio::write(socket_, boost::asio::buffer(&init_data, sizeof(init_data)));
-	}
-	catch (std::exception& e)
+	std::string st = "BEGIN";
+	boost::asio::write(socket_, boost::asio::buffer(st), error);
+	if (error)
 	{
-		throw e;
+		std::cerr << "A aparut o eroare la trimiterea mesajului BEGIN catre clientul " << clientId_
+				  << "\n";
+		throw boost::system::system_error(error);
+	}
+
+	ClientInitialData init_data;
+	init_data.id = clientId_;
+	init_data.nrOfClients = server_->nr_clienti;
+	std::string serializedData = SerializationHelper::SerializeClientIntialData(init_data);
+	boost::asio::write(socket_, boost::asio::buffer(serializedData), error);
+	if (error)
+	{
+		std::cerr << "A aparut o eroare la trimiterea structurii intiiale catre clientul " << clientId_
+				  << "\n";
+		throw boost::system::system_error(error);
 	}
 }

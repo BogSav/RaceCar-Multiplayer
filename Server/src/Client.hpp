@@ -1,12 +1,6 @@
 #pragma once
 
-#include "DataBuffer.hpp"
-
-#include <boost/array.hpp>
 #include <boost/asio.hpp>
-#include <iostream>
-#include <mutex>
-#include <thread>
 
 class Client : public std::enable_shared_from_this<Client>
 {
@@ -14,34 +8,26 @@ public:
 	typedef std::shared_ptr<Client> Ptr;
 	using tcp = boost::asio::ip::tcp;
 
-	static Ptr create(boost::asio::io_context& c, std::size_t, class Server*);
+	static Ptr create(boost::asio::io_context&, std::size_t, class Server*);
 	boost::asio::ip::tcp::socket& GetSocket() { return socket_; }
 	void Setup();
 	void SetOnline();
 
 private:
-	struct InitialDataStructure
-	{
-		std::size_t nrOfPlayers = 0;
-		std::size_t clientId = 0;
-	};
-	Client(boost::asio::io_context& c, std::size_t, class Server*);
+	Client(boost::asio::io_context&, std::size_t, class Server*);
+
 	void handle_receive();
 	void handle_send(boost::system::error_code&);
 	void handle_initial_data();
 
 private:
+	std::jthread jThread;
 	tcp::socket socket_;
-	boost::array<std::uint8_t, DataBuffer::dataSize> buffer;
+	const std::size_t clientId_;
 
-	const std::size_t client_id;
-
-	std::mutex mtx;
+	std::mutex mtx_;
 	std::condition_variable cv_;
-	bool isOnline;
+	bool isOnline_;
 
-	class Server* server;
-	DataBuffer& data;
-
-	std::jthread j;
+	class Server* server_;
 };

@@ -117,7 +117,7 @@ get_filename_component(PARENT_DIR ../ ABSOLUTE)
 set(GFXF_INCLUDE_DIRS_PRIVATE
     ${GFXF_ROOT_DIR}/deps/api
     ${CMAKE_CURRENT_LIST_DIR}/src
-    ${PARENT_DIR}/boost_1_81_0
+    ${PARENT_DIR}/boost_1_82_0
 )
 
 

@@ -1,5 +1,7 @@
 #pragma once
+
 #include "Client.hpp"
+#include "DataArray.hpp"
 
 #include <boost/asio.hpp>
 
@@ -16,7 +18,6 @@ private:
 	tcp::acceptor acceptor_;
 	boost::asio::io_context& io_contex_;
 
-	std::mutex mtx_date_clienti_;
 	std::mutex mtx_clienti_;
 
 	void start_accept();
@@ -27,5 +28,5 @@ private:
 public:
 	std::vector<Client::Ptr> clienti;
 	std::atomic<std::size_t> nr_clienti;
-	DataBuffer data;
+	DataArray<ClientData, maxNumberOfClients> dateClienti;
 };
