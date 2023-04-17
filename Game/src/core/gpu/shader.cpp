@@ -86,29 +86,29 @@ void Shader::GetUniforms()
 
     // Textures
     for (int i = 0; i < MAX_2D_TEXTURES; i++) {
-        sprintf(buffer, "u_texture_%d", i);
+		sprintf_s(buffer, "u_texture_%d", i);
         loc_textures[i] = GetUniformLocation(buffer);
     }
 
     // Lighting
     for (int i = 0; i < MAX_LIGHTING_SOURCES; i++)
     {
-        sprintf(buffer, "LightSources[%d].position", i);
+        sprintf_s(buffer, "LightSources[%d].position", i);
         lposition[i] = GetUniformLocation(buffer);
 
-        sprintf(buffer, "LightSources[%d].type", i);
+        sprintf_s(buffer, "LightSources[%d].type", i);
         ltype[i] = GetUniformLocation(buffer);
 
-        sprintf(buffer, "LightSources[%d].color", i);
+        sprintf_s(buffer, "LightSources[%d].color", i);
         lcolor[i] = GetUniformLocation(buffer);
 
-        sprintf(buffer, "LightSources[%d].direction", i);
+        sprintf_s(buffer, "LightSources[%d].direction", i);
         ldirection[i] = GetUniformLocation(buffer);
 
-        sprintf(buffer, "LightSources[%d].cutOff", i);
+        sprintf_s(buffer, "LightSources[%d].cutOff", i);
         lcutoff[i] = GetUniformLocation(buffer);
 
-        sprintf(buffer, "LightSources[%d].intensity", i);
+        sprintf_s(buffer, "LightSources[%d].intensity", i);
         lintensity[i] = GetUniformLocation(buffer);
     }
 

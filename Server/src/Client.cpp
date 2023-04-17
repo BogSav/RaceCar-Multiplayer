@@ -71,6 +71,7 @@ void Client::handle_receive()
 
 	while (true)
 	{
+		serializedData.clear();
 		size_t length = socket_.read_some(boost::asio::buffer(serializedData), error);
 
 		if (error)
@@ -132,8 +133,8 @@ void Client::handle_initial_data()
 	boost::asio::write(socket_, boost::asio::buffer(serializedData), error);
 	if (error)
 	{
-		std::cerr << "A aparut o eroare la trimiterea structurii intiiale catre clientul " << clientId_
-				  << "\n";
+		std::cerr << "A aparut o eroare la trimiterea structurii intiiale catre clientul "
+				  << clientId_ << "\n";
 		throw boost::system::system_error(error);
 	}
 }

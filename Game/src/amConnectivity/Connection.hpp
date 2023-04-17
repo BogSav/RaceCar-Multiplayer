@@ -3,23 +3,7 @@
 #include "utils/glm_utils.h"
 #include "utils/math_utils.h"
 #include "SyncHelpper.hpp"
-
-struct TransferStructure
-{
-	float x = 0.f;
-	float y = 0.f;
-	float z = 0.f;
-
-	float angleOrientation = 0.f;
-
-	std::size_t clientId;
-};
-
-struct InitialDataStructure
-{
-	std::size_t nrOfPlayers = 0;
-	std::size_t clientId = 0;
-};
+#include "../../Server/src/SerializationHelper.hpp"
 
 class Connection : public std::jthread
 {
@@ -32,15 +16,14 @@ public:
 	void UpdateNPCParams(glm::vec3& pos, float& angleOrientation, const std::size_t&) const;
 	void UpdateClientParams(const glm::vec3& pos, const float& angleOrientation);
 
-	std::size_t GetClientId() { return clientId; }
-	std::vector<TransferStructure>& SafeAccessNPCData();
-	const TransferStructure& SafeAccessClientData() const;
+	std::size_t GetClientId() { return clientId_.load(); }
+	bool GetOnlineStatus() { return isFullyOnline; }
 
 	~Connection();
 
 private:
 	void handle_client();
-	void handle_receive();
+	void handle_receive(boost::system::error_code& error);
 	void handle_send();
 	void handle_deconnect();
 
@@ -48,24 +31,22 @@ private:
 	void wait_until_npc_is_connected();
 
 private:
-	static constexpr std::size_t transferStructureSize = sizeof(TransferStructure);
+	const std::string m_ip_adress_string;
+	const long m_port;
 
-	std::string m_ip_adress_string;
-	long m_port;
-	std::size_t clientId;
-
-	std::vector<TransferStructure> NPCs_data;
-	TransferStructure client_data;
-	InitialDataStructure initial_data;
-
+	std::atomic<std::size_t> clientId_;
 	boost::asio::io_context io_;
 	tcp::socket socket_;
 	tcp::resolver resolver_;
 	tcp::resolver::results_type endpoint_;
-	boost::asio::strand<boost::asio::io_context::executor_type> strand_;
+
+	DataArray<ClientData, maxNumberOfClients> data_;
+	ClientData clientData_;
+	std::vector<char> serializedData_;
+
+	bool isFullyOnline;
 
 	mutable std::mutex mtx_;
-	mutable std::mutex mtx_npc;
 
 	SyncHelpper& syncHelpper;
 };

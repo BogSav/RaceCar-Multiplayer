@@ -24,9 +24,11 @@ set(CMAKE_POLICY_DEFAULT_CMP0012 NEW)
 
 
 add_compile_definitions(_WIN32_WINNT=0x0601)
+add_compile_options(/wd4201)
 
 # Find required packages
 find_package(OpenGL REQUIRED)
+find_package(Boost 1.82.0 REQUIRED)
 if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
     find_package(GLEW REQUIRED)
     find_package(PkgConfig REQUIRED)
@@ -36,46 +38,12 @@ if (NOT CMAKE_SYSTEM_NAME STREQUAL "Windows")
     find_package(Freetype REQUIRED)
 endif()
 
-
-# Set options
-option(CONNECTIVITY "Connectivity pack (multiplayer things)" OFFCMAK)
-option(GAME "The game (literally the entier game)" OFF)
-option(UI "UI aka menus" OFF)
-option(GEOMETRY "All the geometry" OFF)
-option(UTILITIES "Utilities" OFF)
-option(SHADERS "Shaders both 2d and 3d" OFF)
-
-
 # Set RPATH to avoid using LD_LIBRARY_PATH
 set(CMAKE_BUILD_WITH_INSTALL_RPATH ON)
 if (CMAKE_SYSTEM_NAME STREQUAL "Darwin")
     set(CMAKE_INSTALL_RPATH "@executable_path")
 else()
     set(CMAKE_INSTALL_RPATH "$ORIGIN")
-endif()
-
-
-# Set the suffixes for directories, depending on how we want to include
-# sources and headers for different courses. If the suffix variables remain
-# empty, the GLOB_RECURSE will look for files in the directory called `lab_`
-# which does not actually exist, but will not fail.
-if (CONNECTIVITY)
-    set(CONNECTIVITY_SUFF "Connectivity")
-endif()
-if (GAME)
-    set(GAME_SUFF "Game")
-endif()
-if (UI)
-    set(UI_SUFF "UI")
-endif()
-if (GEOMETRY)
-    set(GEOMETRY_SUFF "Geometry")
-endif()
-if (UTILITIES)
-    set(UTILITIES_SUFF "Utilities")
-endif()
-if (SHADERS)
-    set(SHADERS_SUFF "CustomShaders")
 endif()
 
 
@@ -87,11 +55,7 @@ file(GLOB_RECURSE GFXF_SOURCES
     #
     ${CMAKE_CURRENT_LIST_DIR}/src/main.cpp
     #
-    ${CMAKE_CURRENT_LIST_DIR}/src/am${CONNECTIVITY_SUFF}/*.c*
-    ${CMAKE_CURRENT_LIST_DIR}/src/am${GAME_SUFF}/*.c*
-    ${CMAKE_CURRENT_LIST_DIR}/src/am${UI_SUFF}/*.c*
-    ${CMAKE_CURRENT_LIST_DIR}/src/am${GEOMETRY_SUFF}/*.c*
-    ${CMAKE_CURRENT_LIST_DIR}/src/am${UTILITIES_SUFF}/*.c*
+    ${CMAKE_CURRENT_LIST_DIR}/src/am*/*.cpp
 )
 
 
@@ -102,22 +66,16 @@ file(GLOB_RECURSE GFXF_HEADERS_PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/src/utils/*.h*
     #
     ${CMAKE_CURRENT_LIST_DIR}/res/*.glsl
+    ${CMAKE_CURRENT_LIST_DIR}/src/amShaders/*.glsl
     #
-    ${CMAKE_CURRENT_LIST_DIR}/src/am${CONNECTIVITY_SUFF}/*.h*
-    ${CMAKE_CURRENT_LIST_DIR}/src/am${GAME_SUFF}/*.h*
-    ${CMAKE_CURRENT_LIST_DIR}/src/am${GEOMETRY_SUFF}/*.h*
-    ${CMAKE_CURRENT_LIST_DIR}/src/am${UTILITIES_SUFF}/*.h*
-    ${CMAKE_CURRENT_LIST_DIR}/src/am${UI_SUFF}/*.h*
-    #
-    ${CMAKE_CURRENT_LIST_DIR}/src/am${SHADERS_SUFF}/*.glsl
+    ${CMAKE_CURRENT_LIST_DIR}/src/am*/*.hpp
 )
 
-get_filename_component(PARENT_DIR ../ ABSOLUTE)
+
 # Gather the include directories
 set(GFXF_INCLUDE_DIRS_PRIVATE
     ${GFXF_ROOT_DIR}/deps/api
     ${CMAKE_CURRENT_LIST_DIR}/src
-    ${PARENT_DIR}/boost_1_82_0
 )
 
 
@@ -162,6 +120,17 @@ endif()
 target_link_libraries(${target_name} PRIVATE
     ${OPENGL_LIBRARIES}
 )
+
+if(Boost_FOUND)
+  include_directories(${Boost_INCLUDE_DIRS})
+  target_link_libraries(${target_name} ${Boost_LIBRARIES})
+  target_link_libraries(${target_name} PRIVATE ${Boost_LIBRARY_DIRS}/*.lib)
+  message(STATUS "Libraria BOOST incarcata cu succes in " ${target_name})
+endif()
+
+target_include_directories(${target_name} PRIVATE   
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../Server/src/SerializationHelper.hpp>
+    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../Server/src/DataArray.hpp>)
 
 if (CMAKE_SYSTEM_NAME STREQUAL "Windows")
     target_link_libraries(${target_name} PRIVATE
@@ -233,21 +202,6 @@ source_group(TREE ${CMAKE_CURRENT_LIST_DIR} FILES
     ${GFXF_SOURCES_HIDDEN}
     ${GFXF_HEADERS_PRIVATE}
 )
-
-
-# Add definitions (specific to this project)
-# Recommended reading: so@a/24470998/5922876, so@a/11437693/5922876
-set(GFXF_CXX_DEFS       LIBGFXC_EXPORTS GLM_FORCE_SILENT_WARNINGS _CRT_SECURE_NO_WARNINGS SOLVED $<$<CONFIG:Debug>:DEBUG>)
-if (CONNECTIVITY)
-    set(GFXF_CXX_DEFS   ${GFXF_CXX_DEFS} CONNECTIVITY)
-endif()
-if (GAME)
-    set(GFXF_CXX_DEFS   ${GFXF_CXX_DEFS} GAME)
-endif()
-if (UI)
-    set(GFXF_CXX_DEFS   ${GFXF_CXX_DEFS} UI)
-endif()
-target_compile_definitions(${target_name} PRIVATE ${GFXF_CXX_DEFS})
 
 
 # Add compile options (specific to this project)

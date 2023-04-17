@@ -26,12 +26,12 @@ public:
 	// Functii start-stop conexiune
 	void PauseConnection()
 	{
-		std::cout << "S-a creat clientul, acum asteptam deblocarea thread-ului..." << std::endl;
+		std::cerr << "S-a creat clientul, acum asteptam deblocarea thread-ului..." << std::endl;
 		{
 			std::unique_lock<std::mutex> lock(connectionMtx);
 			connectionCv_.wait(lock, [this] { return connectionOn; });
 		}
-		std::cout << "Thread-ul a fost deblocat, se continua cu conexiunea..." << std::endl;
+		std::cerr << "Thread-ul a fost deblocat, se continua cu conexiunea..." << std::endl;
 	}
 	void ResumeConnection()
 	{

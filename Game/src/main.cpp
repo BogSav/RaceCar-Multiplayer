@@ -1,9 +1,7 @@
 #include <ctime>
 #include <iostream>
 
-#if defined(GAME)
 #include "amGame/GameHandler.hpp"
-#endif
 
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>

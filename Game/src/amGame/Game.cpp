@@ -25,12 +25,13 @@ void Game::Init()
 
 		m_car = std::make_unique<Car>(m_shaders["SimpleShader"].get(), m_cameraAttachedToCar);
 
-		for (auto& data : Engine::GetConnection()->SafeAccessNPCData())
-		{
-			if (Engine::GetConnection()->GetClientId() != data.clientId)
-				NPCs.emplace_back(std::make_unique<NPCCar>(
-					m_shaders["SimpleShader"].get(), m_cameraAttachedToCar, data.clientId));
-		}
+		if (Engine::GetConnection()->GetOnlineStatus())
+			for (std::size_t i = 0; i < maxNumberOfClients; i++)
+			{
+				if (Engine::GetConnection()->GetClientId() != i)
+					NPCs.emplace_back(std::make_unique<NPCCar>(
+						m_shaders["SimpleShader"].get(), m_cameraAttachedToCar, i));
+			}
 	}
 
 	{

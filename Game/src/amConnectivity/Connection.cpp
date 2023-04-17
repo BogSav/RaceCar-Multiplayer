@@ -9,11 +9,11 @@ Connection::Connection(SyncHelpper& syncHelpper, std::string ip_adress, long por
 	  resolver_(io_),
 	  m_ip_adress_string(ip_adress),
 	  m_port(port),
-	  strand_(io_.get_executor()),
-	  syncHelpper(syncHelpper)
+	  syncHelpper(syncHelpper),
+	  isFullyOnline(false)
 {
-	NPCs_data.push_back(TransferStructure());
-	NPCs_data.push_back(TransferStructure());
+	std::lock_guard<std::mutex> lock(mtx_);
+	clientData_.id = clientId_;
 }
 
 Connection::~Connection()
@@ -28,70 +28,73 @@ void Connection::handle_client()
 	{
 		connect_to_server();
 		wait_until_npc_is_connected();
-		syncHelpper.ResumeGame();
 
-		{
-			handle_send();
-			std::jthread context([this]() { io_.run(); });
-		}
+		handle_send();
 
-		std::cout << "Se inchide conexiunea cu server-ul..." << std::endl;
+		socket_.close();
 	}
 	catch (std::exception& e)
 	{
-		std::cout << "Se opreste clientul din cazua erorii: " << e.what() << std::endl;
+		std::cerr << e.what();
+		socket_.close();
 	}
-}
-
-void Connection::handle_receive()
-{
-	socket_.async_receive(
-		boost::asio::buffer(&SafeAccessNPCData(), transferStructureSize * 2),
-		boost::asio::bind_executor(
-			strand_,
-			[this](boost::system::error_code error, std::size_t length)
-			{
-				if (error == boost::asio::error::eof)
-				{
-					std::cout << "Client disconnected: "
-							  << socket_.remote_endpoint().address().to_string() << std::endl;
-				}
-				else if (error)
-				{
-					std::cout << "A aparut o eroare supicioasa si se inchide conexiunea"
-							  << error.what() << std::endl;
-					socket_.close();
-					return;
-				}
-
-				// if (length == transferStructureSize)
-				//{
-				//	std::lock_guard<std::mutex> lock(mutex_NPC);
-				//	memcpy_s(&NPC_data, transferStructureSize, &NPC_data_buffer, length);
-				// }
-
-				handle_send();
-			}));
 }
 
 void Connection::handle_send()
 {
-	boost::asio::async_write(
-		socket_,
-		boost::asio::buffer(&SafeAccessClientData(), transferStructureSize),
-		boost::asio::bind_executor(
-			strand_,
-			[this](boost::system::error_code error, std::size_t length)
-			{
-				if (error)
-				{
-					std::cout << "A aparut o eroare la trimitere" << error.what() << std::endl;
-					socket_.close();
-					return;
-				}
+	boost::system::error_code error;
+	std::string serializedData;
 
-				handle_receive();
-			}));
+	while (true)
+	{
+		{
+			std::lock_guard<std::mutex> lock(mtx_);
+			serializedData = SerializationHelper::SerializeClientData(clientData_);
+		}
+
+		boost::asio::write(socket_, boost::asio::buffer(serializedData), error);
+
+		if (error)
+		{
+			std::cerr << "A aparut o eroare la trimiterea datelor\n";
+			throw boost::system::system_error(error);
+		}
+
+		handle_receive(error);
+	}
+}
+
+void Connection::handle_receive(boost::system::error_code& error)
+{
+	serializedData_.clear();
+	size_t length = socket_.read_some(boost::asio::buffer(serializedData_), error);
+
+	if (error)
+	{
+		std::cerr << "A aparut o eroare de primire la clientul " << clientId_ << "\n";
+		if (error == boost::asio::error::eof)
+		{
+			std::cerr << "Este posibil ca clientul " << clientId_ << " sa se fii deconectat\n";
+		}
+		throw boost::system::system_error(error);
+	}
+
+	if (length == clientDataSize)
+	{
+		data_ = SerializationHelper::DeserializeDataArray<ClientData, maxNumberOfClients>(
+			std::string(serializedData_.begin(), serializedData_.end()));
+
+		if (!isFullyOnline)
+		{
+			isFullyOnline = true;
+			syncHelpper.ResumeGame();
+		}
+	}
+	else
+	{
+		std::cerr << "S-a trimis ceva ce nu trebuia probabil, cu lungimea asta: " << length << "\n";
+		throw std::runtime_error("Clientul a primit un mesaj extra dubios");
+	}
 }
 
 void Connection::handle_deconnect()
@@ -101,71 +104,65 @@ void Connection::handle_deconnect()
 
 void Connection::connect_to_server()
 {
-	try
+	std::cerr << "Se initiaza conexiunea cu serverul..." << std::endl;
+
+	boost::system::error_code error;
+	endpoint_ = resolver_.resolve(m_ip_adress_string, std::to_string(m_port));
+	boost::asio::connect(socket_, endpoint_, error);
+
+	if (error)
 	{
-		std::cout << "Se initiaza conexiunea cu serverul..." << std::endl;
-
-		endpoint_ = resolver_.resolve(m_ip_adress_string, std::to_string(m_port));
-		boost::asio::connect(socket_, endpoint_);
-
-		std::cout << "Conexiune realizata cu succes, se continua..." << std::endl;
+		std::cerr << "A aparut o eroare la conectare ala server\n";
+		throw boost::system::system_error(error);
 	}
-	catch (std::exception& e)
+	else
 	{
-		std::cout << "Nu a putut fii realizata conexiunea" << std::endl;
-		throw e;
+		std::cerr << "Conexiune realizata cu succes, se continua..." << std::endl;
 	}
 }
 
 void Connection::wait_until_npc_is_connected()
 {
-	try
+	boost::system::error_code error;
+
+	boost::asio::streambuf buf;
+	boost::asio::read_until(socket_, buf, "BEGIN", error);
+	if (error)
 	{
-		boost::system::error_code ec;
-
-		boost::asio::streambuf buf;
-		boost::asio::read_until(socket_, buf, "BEGIN", ec);
-
-		if (ec)
-		{
-			std::cout << "A aparut o eroare in primirea mesajului de pornire transfer" << std::endl;
-		}
-		else
-		{
-			boost::asio::read(
-				socket_, boost::asio::buffer(&initial_data, sizeof(initial_data)), ec);
-
-			clientId = initial_data.clientId;
-			Engine::GetGameSettings()->m_nrOfPlayers = initial_data.nrOfPlayers;
-		}
+		std::cerr << "A aparut o eroare in primirea mesajului BEGIN\n";
+		throw boost::system::system_error(error);
 	}
-	catch (std::exception& e)
+
+	serializedData_.clear();
+	boost::asio::read(socket_, boost::asio::buffer(serializedData_), error);
+	if (error)
 	{
-		throw e;
+		std::cerr << "A aparut o eroare in primirea structurii cu datele inititale\n";
+		throw boost::system::system_error(error);
 	}
-}
+	else
+	{
+		ClientInitialData aux = SerializationHelper::DeserializeClientInitialData(
+			std::string(serializedData_.begin(), serializedData_.end()));
+		
+		assert(aux.id < 3 && aux.id >= 0);
+		assert(aux.nrOfClients <= maxNumberOfClients);
 
-std::vector<TransferStructure>& Connection::SafeAccessNPCData()
-{
-	std::lock_guard<std::mutex> lock(mtx_);
-	return NPCs_data;
-}
-
-const TransferStructure& Connection::SafeAccessClientData() const
-{
-	std::lock_guard<std::mutex> lock(mtx_);
-	return client_data;
+		clientId_ = aux.id;
+		Engine::GetGameSettings()->m_nrOfPlayers = aux.nrOfClients;
+		std::cerr << "S-au primit datele initiale\n";
+	}
 }
 
 void Connection::UpdateClientParams(const glm::vec3& pos, const float& angleOrientation)
 {
 	if (mtx_.try_lock())
 	{
-		client_data.x = pos.x;
-		client_data.y = pos.y;
-		client_data.z = pos.z;
+		clientData_.posX = pos.x;
+		clientData_.posY = pos.y;
+		clientData_.posZ = pos.z;
 
-		client_data.angleOrientation = angleOrientation;
+		clientData_.OXangle = angleOrientation;
 
 		mtx_.unlock();
 	}
@@ -178,18 +175,9 @@ void Connection::UpdateClientParams(const glm::vec3& pos, const float& angleOrie
 void Connection::UpdateNPCParams(
 	glm::vec3& pos, float& angleOrientation, const std::size_t& NPC_Id) const
 {
-	if (mtx_npc.try_lock())
-	{
-		pos.x = NPCs_data[NPC_Id].x;
-		pos.y = NPCs_data[NPC_Id].y;
-		pos.z = NPCs_data[NPC_Id].z;
-
-		angleOrientation = NPCs_data[NPC_Id].angleOrientation;
-
-		mtx_npc.unlock();
-	}
-	else
-	{
-		return;
-	}
+	const ClientData& data = data_[NPC_Id];
+	pos.x = data.posX;
+	pos.y = data.posY;
+	pos.z = data.posZ;
+	angleOrientation = data.OXangle;
 }

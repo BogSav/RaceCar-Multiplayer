@@ -71,20 +71,36 @@ private:
 };
 
 template <typename T, std::size_t N>
-class DataArray : public boost::array<T, N>
+class DataArray : private boost::array<T, N>
 {
 public:
 	using base_type = boost::array<T, N>;
 
 	DataArray() : base_type() {}
 	~DataArray() = default;
+	DataArray(const DataArray& other)
+	{
+		*this = other;
+	}
+	DataArray& operator=(const DataArray& other)
+	{
+		if (this != &other)
+		{
+			std::lock(mutex_, other.mutex_);
+			std::lock_guard<std::mutex> lock1(mutex_, std::adopt_lock);
+			std::lock_guard<std::mutex> lock2(other.mutex_, std::adopt_lock);
+
+			boost::array<T, N>::operator=(other);
+		}
+
+		return *this;
+	}
 
 	T& at(std::size_t index)
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
 		return base_type::at(index);
 	}
-
 	const T& at(std::size_t index) const
 	{
 		std::lock_guard<std::mutex> lock(mutex_);
@@ -92,7 +108,6 @@ public:
 	}
 
 	T& operator[](std::size_t index) { return at(index); }
-
 	const T& operator[](std::size_t index) const { return at(index); }
 
 	void fill(const T& value)
