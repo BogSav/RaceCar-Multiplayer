@@ -2,6 +2,8 @@
 
 #include "amGame/GameSettings.hpp"
 #include "core/engine.h"
+#include <algorithm>
+#include <ranges>
 
 Connection::Connection(SyncHelpper& syncHelpper, std::string ip_adress, long port)
 	: std::jthread(&Connection::handle_client, this),
@@ -10,7 +12,8 @@ Connection::Connection(SyncHelpper& syncHelpper, std::string ip_adress, long por
 	  m_ip_adress_string(ip_adress),
 	  m_port(port),
 	  syncHelpper(syncHelpper),
-	  isFullyOnline(false)
+	  isFullyOnline(false),
+	  serializedData_(maxNumberOfClients * clientDataSize, 0)
 {
 	std::lock_guard<std::mutex> lock(mtx_);
 	clientData_.id = clientId_;
@@ -52,6 +55,8 @@ void Connection::handle_send()
 			serializedData = SerializationHelper::SerializeClientData(clientData_);
 		}
 
+		std::size_t dim = serializedData.size();
+		boost::asio::write(socket_, boost::asio::buffer(&dim, sizeof(dim)), error);
 		boost::asio::write(socket_, boost::asio::buffer(serializedData), error);
 
 		if (error)
@@ -66,8 +71,11 @@ void Connection::handle_send()
 
 void Connection::handle_receive(boost::system::error_code& error)
 {
-	serializedData_.clear();
-	size_t length = socket_.read_some(boost::asio::buffer(serializedData_), error);
+	std::size_t dim = 0;
+	boost::asio::read(socket_, boost::asio::buffer(&dim, sizeof(dim)), error);
+
+	serializedData_ = std::vector<char>(dim, 0);
+	boost::asio::read(socket_, boost::asio::buffer(serializedData_), error);
 
 	if (error)
 	{
@@ -79,7 +87,7 @@ void Connection::handle_receive(boost::system::error_code& error)
 		throw boost::system::system_error(error);
 	}
 
-	if (length == clientDataSize)
+	if (dim != 0)
 	{
 		data_ = SerializationHelper::DeserializeDataArray<ClientData, maxNumberOfClients>(
 			std::string(serializedData_.begin(), serializedData_.end()));
@@ -92,7 +100,7 @@ void Connection::handle_receive(boost::system::error_code& error)
 	}
 	else
 	{
-		std::cerr << "S-a trimis ceva ce nu trebuia probabil, cu lungimea asta: " << length << "\n";
+		std::cerr << "S-a trimis ceva ce nu trebuia probabil, cu lungimea asta: " << dim << "\n";
 		throw std::runtime_error("Clientul a primit un mesaj extra dubios");
 	}
 }
@@ -125,15 +133,23 @@ void Connection::wait_until_npc_is_connected()
 {
 	boost::system::error_code error;
 
-	boost::asio::streambuf buf;
-	boost::asio::read_until(socket_, buf, "BEGIN", error);
-	if (error)
+	std::size_t message_size = 0;
+	boost::asio::read(socket_, boost::asio::buffer(&message_size, sizeof(message_size)));
+
+	std::vector<char> message_buffer(message_size);
+	boost::asio::read(socket_, boost::asio::buffer(message_buffer));
+
+	std::string s(message_buffer.begin(), message_buffer.end());
+	if (error || s != "BEGIN")
 	{
 		std::cerr << "A aparut o eroare in primirea mesajului BEGIN\n";
 		throw boost::system::system_error(error);
 	}
 
-	serializedData_.clear();
+	std::size_t data_size = 0;
+	boost::asio::read(socket_, boost::asio::buffer(&data_size, sizeof(data_size)), error);
+
+	serializedData_ = std::vector<char>(data_size, 0);
 	boost::asio::read(socket_, boost::asio::buffer(serializedData_), error);
 	if (error)
 	{
