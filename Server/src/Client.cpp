@@ -3,9 +3,11 @@
 #include "SerializationHelper.hpp"
 #include "Server.hpp"
 
-#include <mutex>
-#include <thread>
+#include <algorithm>
 #include <iostream>
+#include <mutex>
+#include <ranges>
+#include <thread>
 
 
 Client::Client(boost::asio::io_context& context, std::size_t client_id, Server* server)
@@ -71,8 +73,11 @@ void Client::handle_receive()
 
 	while (true)
 	{
-		serializedData.clear();
-		size_t length = socket_.read_some(boost::asio::buffer(serializedData), error);
+		std::size_t dim = 0;
+		boost::asio::read(socket_, boost::asio::buffer(&dim, sizeof(dim)), error);
+
+		serializedData = std::vector<char>(dim, 0);
+		boost::asio::read(socket_, boost::asio::buffer(serializedData), error);
 
 		if (error)
 		{
@@ -84,17 +89,17 @@ void Client::handle_receive()
 			throw boost::system::system_error(error);
 		}
 
-		if (length == clientDataSize)
+		if (dim != 0)
 		{
 			server_->dateClienti[clientId_] = SerializationHelper::DeserializeClientData(
 				std::string(serializedData.begin(), serializedData.end()));
 		}
 		else
 		{
-			std::cerr << "S-a trimis ceva ce nu trebuia probabil, cu lungimea asta: " << length
+			std::cerr << "S-a trimis ceva ce nu trebuia probabil, cu lungimea asta: " << dim
 					  << "\n";
 			throw std::runtime_error(
-				"Clientul " + std::to_string(clientId_) + " a primit un mesaj extra dubios");
+				"Clientul " + std::to_string(clientId_) + " a primit un mesaj extra dubios\n");
 		}
 
 		handle_send(error);
@@ -104,7 +109,10 @@ void Client::handle_receive()
 void Client::handle_send(boost::system::error_code& error)
 {
 	std::string serializedData = SerializationHelper::SerializeDataArray(server_->dateClienti);
-	boost::asio::write(socket_, boost::asio::buffer(boost::asio::buffer(serializedData)), error);
+	std::size_t dim = serializedData.size();
+
+	boost::asio::write(socket_, boost::asio::buffer(&dim, sizeof(dim)), error);
+	boost::asio::write(socket_, boost::asio::buffer(serializedData), error);
 
 	if (error)
 	{
@@ -118,6 +126,8 @@ void Client::handle_initial_data()
 	boost::system::error_code error;
 
 	std::string st = "BEGIN";
+	std::size_t dimm = st.size();
+	boost::asio::write(socket_, boost::asio::buffer(&dimm, sizeof(dimm)), error);
 	boost::asio::write(socket_, boost::asio::buffer(st), error);
 	if (error)
 	{
@@ -129,8 +139,13 @@ void Client::handle_initial_data()
 	ClientInitialData init_data;
 	init_data.id = clientId_;
 	init_data.nrOfClients = server_->nr_clienti;
+
 	std::string serializedData = SerializationHelper::SerializeClientIntialData(init_data);
+	std::size_t dim = serializedData.size();
+	boost::asio::write(socket_, boost::asio::buffer(&dim, sizeof(dim)), error);
+
 	boost::asio::write(socket_, boost::asio::buffer(serializedData), error);
+
 	if (error)
 	{
 		std::cerr << "A aparut o eroare la trimiterea structurii intiiale catre clientul "

@@ -1,8 +1,8 @@
 #include "src/Server.hpp"
 #include <iostream>
 
-std::string ip_adress = "192.168.0.170";
-long port = 25565;
+std::string ip_adress = "192.168.0.192";
+long port = 25500;
 
 int main()
 {
