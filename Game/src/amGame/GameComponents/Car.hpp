@@ -19,11 +19,13 @@ public:
 	void Brake();
 	void InertialDecceleration();
 
-	void InitPlaceTracker(const class Track*);
+	void InitPlaceTracker(const class Track*, const std::vector<std::unique_ptr<class NPCCar>>&);
 
 	int GetGear() const;
 	float GetSpeed() const;
 	float GetProgress() const;
+	uint8_t GetLapNumber() const;
+	std::size_t GetPlace() const;
 
 	void PrintData();
 

@@ -66,7 +66,7 @@ file(GLOB_RECURSE GFXF_HEADERS_PRIVATE
     ${CMAKE_CURRENT_LIST_DIR}/src/utils/*.h*
     #
     ${CMAKE_CURRENT_LIST_DIR}/res/*.glsl
-    ${CMAKE_CURRENT_LIST_DIR}/src/amShaders/*.glsl
+    ${CMAKE_CURRENT_LIST_DIR}/src/amCustomShaders/*.glsl
     #
     ${CMAKE_CURRENT_LIST_DIR}/src/am*/*.hpp
 )

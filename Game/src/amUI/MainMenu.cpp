@@ -1,4 +1,5 @@
 #include "MainMenu.hpp"
+#include "../../Server/src/DataArray.hpp"
 
 #include <iostream>
 
@@ -92,7 +93,6 @@ void MainMenu::UpdateGameSettings()
 	// TODO add UI entries for each settings
 	gameSettings->InitParameters();
 
-	gameSettings->m_isMultiplayer = m_gameMode == GameMode::MULTIPLAYER;
 	gameSettings->m_gameMode = m_gameMode;
 
 	gameSettings->m_resolution = window->GetResolution();
@@ -100,6 +100,17 @@ void MainMenu::UpdateGameSettings()
 	gameSettings->m_frameTimerEnabled = true;
 	gameSettings->m_forceFixedFramerate = true;
 	gameSettings->m_nrOfFramesPerSecondForFixedFramerate = 60.f;
+
+	if (m_gameMode == GameMode::MULTIPLAYER)
+	{
+		gameSettings->m_isMultiplayer = true;
+		gameSettings->m_nrOfPlayers = maxNumberOfClients;
+	}
+	else
+	{
+		gameSettings->m_isMultiplayer = false;
+		gameSettings->m_nrOfPlayers = 1;
+	}
 }
 
 void MainMenu::FrameStart()

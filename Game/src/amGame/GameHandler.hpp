@@ -62,6 +62,15 @@ private:
 			syncHelper.ResumeConnection();
 			syncHelper.PauseGame();
 		}
+		else
+		{
+			//Engine::GetConnection()->setForceStopFlag(true);
+			syncHelper.ResumeConnection();
+			Engine::GetConnection()->request_stop();
+			Engine::GetConnection()->join();
+			delete Engine::GetConnection();
+			Engine::SetConnection(nullptr);
+		}
 	}
 
 private:

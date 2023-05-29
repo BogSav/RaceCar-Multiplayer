@@ -14,48 +14,67 @@ Game::~Game()
 
 void Game::Init()
 {
+
+	// Creem si incarcam shaderele si texturile ce vor fii folosite ulterior
 	CreateShaders();
 	CreateTextures();
 
+	// Creem camera principala
 	m_camera = std::make_unique<CustomCamera>(
 		glm::vec3(0, 2, 3.5f), glm::vec3(0, 1, 0), glm::vec3(0, 1, 0), window->props.aspectRatio);
 
+	// Creare masina jucatorului si NPC-uri
 	{
 		m_cameraAttachedToCar = std::make_shared<CustomCamera>();
 
-		m_car = std::make_unique<Car>(m_shaders["SimpleShader"].get(), m_cameraAttachedToCar);
+		m_car = std::make_unique<Car>(shaders["VertexNormal"], m_cameraAttachedToCar);
 
-		if (Engine::GetConnection()->GetOnlineStatus())
+		if (Engine::GetGameSettings()->m_isMultiplayer)
+		{
 			for (std::size_t i = 0; i < maxNumberOfClients; i++)
 			{
 				if (Engine::GetConnection()->GetClientId() != i)
-					NPCs.emplace_back(std::make_unique<NPCCar>(
+				{
+					m_npcs.emplace_back(std::make_unique<NPCCar>(
 						m_shaders["SimpleShader"].get(), m_cameraAttachedToCar, i));
+				}
 			}
+		}
 	}
 
+	// Generare pista
 	{
 		m_track = std::make_unique<Track>();
 		TrackBuilder* trackBuilder = new TrackBuilder(m_track.get());
-		trackBuilder->BuildTrack(m_shaders["SimpleShader"].get(), m_cameraAttachedToCar.get());
+		trackBuilder->BuildTrack(
+			m_shaders[m_lightingEnabled ? "LightShader" : "SimpleShader"].get(),
+			m_cameraAttachedToCar.get());
 		delete trackBuilder;
 
-		m_car->InitPlaceTracker(m_track.get());
+		m_car->InitPlaceTracker(m_track.get(), m_npcs);
 	}
 
+	// Generare camp
 	{
-		m_field =
-			std::make_unique<Field>(m_shaders["SimpleShader"].get(), m_cameraAttachedToCar.get());
+		m_field = std::make_unique<Field>(
+			m_shaders[m_lightingEnabled ? "LightShader" : "SimpleShader"].get(),
+			m_cameraAttachedToCar.get());
 	}
 
+	// Alocam preevntiv spatiu pentru obiectele generatoarte de lumina
 	m_lightSources.reserve(
-		Engine::GetGameSettings()->GetWorldParameters().m_nrOfStreetLights * 2
+		2 + Engine::GetGameSettings()->GetWorldParameters().m_nrOfStreetLights * 2
 		+ Engine::GetGameSettings()->GetWorldParameters().m_nrOfTrees);
 
+	m_lightSources.push_back(m_car->GetLightSources());
+
+	// Generare stalpi de lumina
 	for (size_t i = 0; i < Engine::GetGameSettings()->GetWorldParameters().m_nrOfStreetLights; i++)
 	{
 		StreetLight* streetLight = new StreetLight(
-			m_shaders["TextureShader"].get(), m_cameraAttachedToCar.get(), m_textures["Pillar"]);
+			m_shaders[m_lightingEnabled ? "TextureShader" : "SimpleShader"].get(),
+			m_cameraAttachedToCar.get(),
+			m_textures["Pillar"]);
 		streetLight->SetPosition(PositionGenerator::GeneratePosition(m_track.get(), true, i));
 		streetLight->InstantiateLightSources();
 		m_lightSources.push_back(streetLight->GetLightSources());
@@ -63,10 +82,11 @@ void Game::Init()
 		m_streetLights.emplace_back(streetLight);
 	}
 
+	// Generare copaci
 	for (size_t i = 0; i < Engine::GetGameSettings()->GetWorldParameters().m_nrOfTrees; i++)
 	{
 		Tree* tree = new Tree(
-			m_shaders["TextureShader"].get(),
+			m_shaders[m_lightingEnabled ? "TextureShader" : "SimpleShader"].get(),
 			m_cameraAttachedToCar.get(),
 			m_textures["Crown"],
 			m_textures["Trunk"]);
@@ -77,6 +97,7 @@ void Game::Init()
 		m_trees.emplace_back(tree);
 	}
 
+	// Creare element de display
 	{
 		m_screenElements = std::make_unique<ScreenElements>(m_car.get());
 	}
@@ -91,26 +112,46 @@ void Game::FrameStart()
 
 void Game::Render(float deltaTime)
 {
-	DrawCoordinateSystem(
-		m_cameraAttachedToCar->GetViewMatrix(), m_cameraAttachedToCar->GetProjectionMatrix());
-
-	m_track->Render();
+	//DrawCoordinateSystem(
+	//	m_cameraAttachedToCar->GetViewMatrix(), m_cameraAttachedToCar->GetProjectionMatrix());
+	
 	m_car->Render();
-	m_field->Render();
-
-	for (auto& npc : NPCs)
+	
+	for (auto& npc : m_npcs)
 	{
 		npc->Render();
 	}
 
-	for (auto& streetLight : m_streetLights)
-	{
-		streetLight->Render();
-	}
 
-	for (auto& tree : m_trees)
+	if (m_lightingEnabled)
 	{
-		tree->Render();
+		m_track->Render(m_camera->GetPosition(), m_lightSources);
+		m_field->Render(m_camera->GetPosition(), m_lightSources);
+
+		for (auto& streetLight : m_streetLights)
+		{
+			streetLight->Render(m_camera->GetPosition(), m_lightSources);
+		}
+
+		for (auto& tree : m_trees)
+		{
+			tree->Render(m_camera->GetPosition(), m_lightSources);
+		}
+	}
+	else
+	{
+		m_track->Render();
+		m_field->Render();
+
+		for (auto& streetLight : m_streetLights)
+		{
+			streetLight->Render();
+		}
+
+		for (auto& tree : m_trees)
+		{
+			tree->Render();
+		}
 	}
 
 	m_screenElements->Render(deltaTime);
@@ -120,13 +161,16 @@ void Game::Render(float deltaTime)
 
 	// if (Engine::GetGameSettings()->m_frameTimerEnabled)
 	//	std::cout << 1.f / deltaTime << std::endl;
+
+	if (justInCase.PassedTime(2.0))
+		m_car->PrintData();
 }
 
 void Game::Update(float deltaTimeSeconds)
 {
 	m_car->Update(deltaTimeSeconds);
 
-	for (auto& npc : NPCs)
+	for (auto& npc : m_npcs)
 	{
 		npc->Update(deltaTimeSeconds);
 	}

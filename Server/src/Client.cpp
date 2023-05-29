@@ -9,7 +9,6 @@
 #include <ranges>
 #include <thread>
 
-
 Client::Client(boost::asio::io_context& context, std::size_t client_id, Server* server)
 	: socket_(context), clientId_(client_id), server_(server)
 {
@@ -64,6 +63,13 @@ void Client::SetOnline()
 
 	isOnline_ = true;
 	cv_.notify_one();
+}
+
+void Client::SetInitialPosition(float posX, float posY, float posZ)
+{
+	initialData_.posX = posX;
+	initialData_.posY = posY;
+	initialData_.posZ = posZ;
 }
 
 void Client::handle_receive()
@@ -136,11 +142,10 @@ void Client::handle_initial_data()
 		throw boost::system::system_error(error);
 	}
 
-	ClientInitialData init_data;
-	init_data.id = clientId_;
-	init_data.nrOfClients = server_->nr_clienti;
+	initialData_.id = clientId_;
+	initialData_.nrOfClients = server_->nr_clienti;
 
-	std::string serializedData = SerializationHelper::SerializeClientIntialData(init_data);
+	std::string serializedData = SerializationHelper::SerializeClientIntialData(initialData_);
 	std::size_t dim = serializedData.size();
 	boost::asio::write(socket_, boost::asio::buffer(&dim, sizeof(dim)), error);
 

@@ -51,13 +51,18 @@ private:
 
 	std::unique_ptr<ScreenElements> m_screenElements;
 
+	bool m_lightingEnabled = true;
+	std::string shaderToUse;
+
 	// Game Components
 	std::unique_ptr<Track> m_track;
 	std::unique_ptr<Car> m_car;
 	std::unique_ptr<Field> m_field;
 	std::vector<std::unique_ptr<StreetLight>> m_streetLights;
 	std::vector<std::unique_ptr<Tree>> m_trees;
-	std::vector<std::unique_ptr<NPCCar>> NPCs;
+	std::vector<std::unique_ptr<NPCCar>> m_npcs;
 
 	ForcedFramerateTimer framerateTimer;
+
+	FTimer justInCase;
 };

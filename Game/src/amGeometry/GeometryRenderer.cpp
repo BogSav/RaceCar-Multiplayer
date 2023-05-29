@@ -229,6 +229,9 @@ void GeometryRenderer::SendLightingDataToShader(
 		[&geometryObject = std::as_const(geometryObject), &i, &location](
 			const LightSourceAdapter* source)
 		{
+			if (source == nullptr)
+				return;
+
 			glUniform1i(geometryObject->m_shader->ltype[i], source->GetLightTypeInt());
 			glUniform3fv(
 				geometryObject->m_shader->lposition[i], 1, glm::value_ptr(source->GetPosition()));

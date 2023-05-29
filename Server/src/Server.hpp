@@ -1,7 +1,6 @@
 #pragma once
 
 #include "Client.hpp"
-#include "DataArray.hpp"
 
 #include <boost/asio.hpp>
 
@@ -22,6 +21,7 @@ private:
 
 	void start_accept();
 	void handle_accept(Client::Ptr client, const boost::system::error_code& error);
+	void handle_start_game();
 
 	friend Client;
 

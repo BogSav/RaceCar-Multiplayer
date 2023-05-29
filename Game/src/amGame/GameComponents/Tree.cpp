@@ -78,25 +78,25 @@ void Tree::Render(const glm::vec3& eyePosition, const LightSourcesVector& lighti
 	glm::mat4 crownModelMatrix = glm::translate(m_modelMatrix, glm::vec3{0, 1.5f, 0});
 	GeometryRenderer::Render(
 		m_objects[1].get(),
-		trunkModelMatrix,
+		crownModelMatrix,
 		eyePosition,
 		lightingComponents,
-		m_trunkTexture.get());
+		m_crownTexture.get());
 	m_bbox += m_objects[1]->GetTranformedBBox(crownModelMatrix);
 
 	crownModelMatrix = glm::translate(crownModelMatrix, glm::vec3{0, 1.f, 0});
 	crownModelMatrix = glm::scale(crownModelMatrix, glm::vec3{0.7f, 0.7f, 0.7f});
 	GeometryRenderer::Render(
 		m_objects[2].get(),
-		trunkModelMatrix,
+		crownModelMatrix,
 		eyePosition,
 		lightingComponents,
-		m_trunkTexture.get());
+		m_crownTexture.get());
 	m_bbox += m_objects[2]->GetTranformedBBox(crownModelMatrix);
 }
 
 void Tree::InstantiateLightSource()
 {
 	m_lightSource =
-		std::make_unique<PointLight>(m_position + glm::vec3{0, 2, 0}, Colors::MakeRandomRGB(), 1.f);
+		std::make_unique<PointLight>(m_position + glm::vec3{0, 2.0f, 0}, Colors::Green, 15.f);
 }

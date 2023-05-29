@@ -70,20 +70,24 @@ void StreetLight::Render(const glm::vec3& eyePosition, const LightSourcesVector&
 
 void StreetLight::InstantiateLightSources()
 {
-	m_leftBulb = std::make_unique<SpotLight>(
-		m_position + glm::vec3{1.3f, 3.f, 0.f},
+	 m_leftBulb = std::make_unique<SpotLight>(
+		m_position + glm::vec3{1.3f, 18.f, 0.f},
 		Colors::White,
-		1.f,
-		RADIANS(30),
+		20.f,
+		RADIANS(50),
 		glm::vec3{0, -1, 0},
 		glm::vec3{-1, 0, 0});
-	m_rightBulb = std::make_unique<SpotLight>(
-		m_position + glm::vec3{-1.3, 3.f, 0.f},
+	 m_rightBulb = std::make_unique<SpotLight>(
+		m_position + glm::vec3{-1.3, 18.f, 0.f},
 		Colors::White,
-		1.f,
-		RADIANS(30),
+		20.f,
+		RADIANS(50),
 		glm::vec3{0, -1, 0},
 		glm::vec3{-1, 0, 0});
+	//m_leftBulb =
+	//	std::make_unique<PointLight>(m_position + glm::vec3{1.3f, 12.f, 0.f}, Colors::White, 5.f);
+	//m_rightBulb =
+	//	std::make_unique<PointLight>(m_position + glm::vec3{-1.3, 12.f, 0.f}, Colors::White, 5.f);
 }
 
 std::pair<const LightSourceAdapter*, const LightSourceAdapter*> StreetLight::GetLightSources() const

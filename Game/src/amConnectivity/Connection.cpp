@@ -2,6 +2,7 @@
 
 #include "amGame/GameSettings.hpp"
 #include "core/engine.h"
+
 #include <algorithm>
 #include <ranges>
 
@@ -26,6 +27,11 @@ Connection::~Connection()
 void Connection::handle_client()
 {
 	syncHelpper.PauseConnection();
+
+	// if (m_forceStop)
+	//{
+	//	return;
+	// }
 
 	try
 	{
@@ -160,17 +166,24 @@ void Connection::wait_until_npc_is_connected()
 	{
 		ClientInitialData aux = SerializationHelper::DeserializeClientInitialData(
 			std::string(serializedData_.begin(), serializedData_.end()));
-		
+
 		assert(aux.id < 3 && aux.id >= 0);
 		assert(aux.nrOfClients <= maxNumberOfClients);
 
 		clientId_ = aux.id;
 		Engine::GetGameSettings()->m_nrOfPlayers = aux.nrOfClients;
+		Engine::GetGameSettings()->GetCarParameters().startPosition =
+			glm::vec3{aux.posX, aux.posY, aux.posZ};
+
 		std::cerr << "S-au primit datele initiale\n";
 	}
 }
 
-void Connection::UpdateClientParams(const glm::vec3& pos, const float& angleOrientation)
+void Connection::UpdateClientParams(
+	const glm::vec3& pos,
+	const float& angleOrientation,
+	const std::size_t& positionOnTrack,
+	const uint8_t& lapNr)
 {
 	if (mtx_.try_lock())
 	{
@@ -179,6 +192,9 @@ void Connection::UpdateClientParams(const glm::vec3& pos, const float& angleOrie
 		clientData_.posZ = pos.z;
 
 		clientData_.OXangle = angleOrientation;
+
+		clientData_.lapNr = lapNr;
+		clientData_.positionOnTrack = positionOnTrack;
 
 		mtx_.unlock();
 	}
@@ -189,11 +205,17 @@ void Connection::UpdateClientParams(const glm::vec3& pos, const float& angleOrie
 }
 
 void Connection::UpdateNPCParams(
-	glm::vec3& pos, float& angleOrientation, const std::size_t& NPC_Id) const
+	glm::vec3& pos,
+	float& angleOrientation,
+	std::size_t& positionOnTrack,
+	uint8_t& lapNr,
+	const std::size_t& NPC_Id) const
 {
 	const ClientData& data = data_[NPC_Id];
 	pos.x = data.posX;
 	pos.y = data.posY;
 	pos.z = data.posZ;
 	angleOrientation = data.OXangle;
+	lapNr = data.lapNr;
+	positionOnTrack = data.positionOnTrack;
 }

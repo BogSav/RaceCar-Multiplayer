@@ -65,6 +65,8 @@ public:
 			this->m_gearForces = {
 				0.f, 40000.f, 35000.f, 30000.f, 25000.f, 23000.f, 20000.f, 18000.f};  // Newtons
 			this->m_gearShiftLimits = {0.f, 20.f, 40.f, 55.f, 70.f, 85.f, 110.f, 200.f};  // m/s
+
+			this->startPosition = glm::vec3{-10.f, -0.1f, -40.f};
 		}
 
 		std::vector<float> m_gearForces;
@@ -77,6 +79,8 @@ public:
 		float dragCoefficient = 0.f;
 		float frontalArea = 0.f;
 		float frictionCoefficient = 0.f;
+
+		glm::vec3 startPosition = glm::vec3{0.f, 0.f, 0.f};
 	};
 
 	struct TrackParaneters
@@ -162,6 +166,13 @@ public:
 		return m_inGameDisplayParameters;
 	}
 
+	PhysicsParameters& GetPhysicsParameters() { return (m_physicsParameters); }
+	WorldParameters& GetWorldParameters() { return (m_worldParameters); }
+	CarParameters& GetCarParameters() { return (m_carParameters); }
+	TrackParaneters& GetTrackParameters() { return (m_trackParemetrs); }
+	FieldParameters& GetFieldParameters() { return m_fieldParameters; }
+	InGameDisplayParameters& GetInGameDisplayParameters() { return m_inGameDisplayParameters; }
+
 	void InitParameters()
 	{
 		m_physicsParameters.InitParameters();
@@ -176,7 +187,7 @@ public:
 public:
 	GameMode m_gameMode = GameMode::UNSELECTED;
 	bool m_isMultiplayer;
-	size_t m_nrOfPlayers = 0;
+	size_t m_nrOfPlayers;
 
 	glm::ivec2 m_resolution;
 

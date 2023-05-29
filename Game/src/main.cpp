@@ -31,7 +31,7 @@ int main(int argc, char** argv)
 
 	SyncHelpper helper;
 
-	Connection* connection = new Connection{helper, "192.168.0.192", 25500};
+	Connection* connection = new Connection{helper, "192.168.0.186", 25500};
 
 	Engine::SetConnection(connection);
 	Engine::SetGameSettings(new GameSettings());

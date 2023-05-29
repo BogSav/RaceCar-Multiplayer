@@ -26,10 +26,11 @@ struct ClientInitialData
 	////////////////////////////////////////////////////////////////////
 	std::size_t nrOfClients;
 	std::size_t id;
+	float posX, posY, posZ;
 
 private:
-	static_assert(CACHE_LINE_SIZE > sizeof(std::size_t) * 2);
-	char padding[CACHE_LINE_SIZE - sizeof(std::size_t) * 2];
+	static_assert(CACHE_LINE_SIZE > sizeof(std::size_t) * 2 + sizeof(float) * 3);
+	char padding[CACHE_LINE_SIZE - sizeof(std::size_t) * 2 - sizeof(float) * 3];
 
 	// Serializare
 	friend class boost::serialization::access;
@@ -39,6 +40,9 @@ private:
 	{
 		ar& nrOfClients;
 		ar& id;
+		ar& posX;
+		ar& posY;
+		ar& posZ;
 	}
 };
 
@@ -51,10 +55,12 @@ struct ClientData
 	float posX, posY, posZ;
 	float OXangle;
 	std::size_t id;  // For verification only
+	std::size_t positionOnTrack;
+	uint8_t lapNr;
 
 private:
-	static_assert(CACHE_LINE_SIZE > sizeof(std::size_t) + sizeof(float) * 4);
-	char padding[CACHE_LINE_SIZE - sizeof(std::size_t) - sizeof(float) * 4];
+	static_assert(CACHE_LINE_SIZE > sizeof(std::size_t) * 2 + sizeof(float) * 4 - sizeof(uint8_t));
+	char padding[CACHE_LINE_SIZE - sizeof(std::size_t) * 2 - sizeof(float) * 4 - sizeof(uint8_t)];
 
 	// Serializare
 	friend class boost::serialization::access;
@@ -67,6 +73,8 @@ private:
 		ar& posZ;
 		ar& OXangle;
 		ar& id;
+		ar& positionOnTrack;
+		ar& lapNr;
 	}
 };
 

@@ -56,20 +56,20 @@ public:
 
 		//if (Engine::GetGameSettings()->m_frameTimerEnabled && frameTimer.PassedTime(0.001f))
 		//	m_textEngine->Render(std::to_string(1.0f / deltaTime), 40, 600, 1.f, Colors::Cyan);
-		//m_textEngine->Render(
-		//	"Current lap: " + std::to_string(m_currentLap) + " / 5",
-		//	20,
-		//	20,
-		//	1.0f,
-		//	Colors::LightGray);
+		m_textEngine->Render(
+			"Current lap: " + std::to_string(m_car->GetLapNumber()) + " / 5",
+			20.0f,
+			static_cast<float>(Engine::GetWindow()->GetResolution().y) - 20.0f,
+			1.0f,
+			Colors::LightGray);
 
-		//m_textEngine->Render(
-		//	"Place: " + std::to_string(placeAndNr.first) + " / "
-		//		+ std::to_string(placeAndNr.second),
-		//	20,
-		//	50,
-		//	1.0f,
-		//	Colors::LightGray);
+		m_textEngine->Render(
+			"Place: " + std::to_string(m_car->GetPlace()) + " / "
+				+ std::to_string(Engine::GetGameSettings()->m_nrOfPlayers),
+			20.0f,
+			static_cast<float>(Engine::GetWindow()->GetResolution().y) - 50.0f,
+			1.0f,
+			Colors::LightGray);
 	}
 
 private:

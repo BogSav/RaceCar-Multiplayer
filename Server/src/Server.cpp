@@ -2,6 +2,8 @@
 
 #include <boost/bind/bind.hpp>
 #include <iostream>
+#include <vector>
+#include <tuple>
 
 Server::Server(boost::asio::io_context& io_, std::string ip_adress, long port)
 	: io_contex_(io_),
@@ -48,17 +50,30 @@ void Server::handle_accept(Client::Ptr client, const boost::system::error_code& 
 
 	if (nr_clienti == maxNumberOfClients)
 	{
-		std::cout << "S-au conectat suficienti playeri..." << std::endl;
-
-		for (auto& client : clienti)
-		{
-			client->SetOnline();
-		}
-
-		std::cout << "Se opreste acceptarea de noi clienti\n";
+		handle_start_game();
 	}
 	else
 	{
 		start_accept();
 	}
+}
+
+void Server::handle_start_game()
+{
+	std::cout << "S-au conectat suficienti playeri..." << std::endl;
+
+	std::vector<std::tuple<float, float, float>> v;
+	v.push_back({-10.0f, -0.1f, -40.0f});
+	v.push_back({-37.0f, -0.1f, -47.0f});
+
+	size_t i = 0;
+	for (auto& client : clienti)
+	{
+		client->SetInitialPosition(std::get<0>(v[i]), std::get<1>(v[i]), std::get<2>(v[i]));
+		client->SetOnline();
+
+		i++;
+	}
+
+	std::cout << "Se opreste acceptarea de noi clienti\n";
 }

@@ -1,10 +1,14 @@
 #include "PlaceTracker.hpp"
+#include "amGame/GameSettings.hpp"
 
-PlaceTracker::PlaceTracker(const BaseCar* car, const Track* track)
+PlaceTracker::PlaceTracker(
+	const BaseCar* car, const Track* track, const std::vector<std::unique_ptr<NPCCar>>& npcs)
 	: m_searchPositionTrashHold(10),
 	  m_track(track),
 	  m_car(car),
-	  m_trackSize(track->GetInteriorPoints().size())
+	  m_trackSize(track->GetInteriorPoints().size()),
+	  m_npcs(npcs),
+	  m_lapNr(0)
 {
 	FindInitialPositionOnTrack();
 }
@@ -35,7 +39,14 @@ void PlaceTracker::UpdateCurrentPositionOnTrack()
 		}
 	}
 
+	if (minPosition < m_currentPosition)
+	{
+		m_lapNr++;
+	}
+
 	m_currentPosition = minPosition;
+
+	UpdatePlace();
 }
 
 bool PlaceTracker::IsOutsideOfTrack()
@@ -46,9 +57,14 @@ bool PlaceTracker::IsOutsideOfTrack()
 		> 0;
 }
 
-float PlaceTracker::GetCurrentPositionAsPercent()
+float PlaceTracker::GetCurrentPositionAsPercent() const
 {
 	return static_cast<float>(m_currentPosition) / static_cast<float>(m_trackSize) * 100.f;
+}
+
+uint8_t PlaceTracker::GedtLapNumber() const
+{
+	return m_lapNr;
 }
 
 void PlaceTracker::FindInitialPositionOnTrack()
@@ -69,4 +85,17 @@ void PlaceTracker::FindInitialPositionOnTrack()
 	}
 
 	m_currentPosition = minPosition;
+
+	UpdatePlace();
+}
+
+void PlaceTracker::UpdatePlace()
+{
+	m_place = Engine::GetGameSettings()->m_nrOfPlayers;
+	for (auto& npc : m_npcs)
+	{
+		if (static_cast<size_t>(npc->GetLapNr()) * m_trackSize + npc->GetPositionOnTrack()
+			< static_cast<size_t>(m_lapNr) * m_trackSize + m_currentPosition)
+			m_place--;
+	}
 }

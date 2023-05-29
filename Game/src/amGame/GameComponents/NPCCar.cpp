@@ -41,7 +41,8 @@ void NPCCar::Render(CustomCamera* const camera, const Shader* const shader)
 
 void NPCCar::Update(float deltaTime)
 {
-	Engine::GetConnection()->UpdateNPCParams(m_position, m_angleOrientation, id);
+	Engine::GetConnection()->UpdateNPCParams(
+		m_position, m_angleOrientation, m_positionOnTrack, m_lapNr, id);
 	this->ComputeModelMatrix();
 }
 

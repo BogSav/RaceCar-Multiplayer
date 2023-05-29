@@ -4,6 +4,13 @@
 
 class BaseCar : public GameComponent
 {
+public:
+	std::pair<const LightSourceAdapter*, const LightSourceAdapter*> GetLightSources() const
+	{
+		return std::pair<const LightSourceAdapter*, const LightSourceAdapter*>{
+			m_headLightLeft.get(), m_headLightRight.get()};
+	};
+
 protected:
 	BaseCar(const Shader* const shader, std::shared_ptr<CustomCamera> camera)
 		: GameComponent(), m_shader(shader), m_camera(camera){};

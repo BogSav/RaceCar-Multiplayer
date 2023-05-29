@@ -2,6 +2,7 @@
 
 #include "PlaceTracker.hpp"
 #include "amConnectivity/Connection.hpp"
+#include "NPCCar.hpp"
 
 #include <iostream>
 
@@ -14,7 +15,7 @@ Car::Car(
 {
 	BaseCar::InitMesh();
 
-	m_position = {-10.f, -0.1f, -40.f};
+	m_position = Engine::GetGameSettings()->GetCarParameters().startPosition;
 	m_scale = {0.7f, 0.7f, 0.7f};
 	m_direction = {1.f, 0.f, 0.f};
 	m_angleOrientation = 0.f;
@@ -88,7 +89,11 @@ void Car::Update(float deltaTime)
 
 	if (Connection* connection = Engine::GetConnection())
 	{
-		connection->UpdateClientParams(m_position, m_angleOrientation);
+		connection->UpdateClientParams(
+			m_position,
+			m_angleOrientation,
+			m_placeTracker->GetCurrentPosition(),
+			m_placeTracker->GedtLapNumber());
 	}
 
 	//std::cout << std::boolalpha << m_placeTracker->IsOutsideOfTrack() << std::endl;
@@ -109,9 +114,9 @@ void Car::InertialDecceleration()
 	m_engine->InertialDeccelerate();
 }
 
-void Car::InitPlaceTracker(const Track* track)
+void Car::InitPlaceTracker(const Track* track, const std::vector<std::unique_ptr<NPCCar>>& npcs)
 {
-	m_placeTracker = std::make_unique<PlaceTracker>(this, track);
+	m_placeTracker = std::make_unique<PlaceTracker>(this, track, npcs);
 }
 
 int Car::GetGear() const
@@ -129,9 +134,22 @@ float Car::GetProgress() const
 	return m_placeTracker->GetCurrentPositionAsPercent();
 }
 
+uint8_t Car::GetLapNumber() const
+{
+	return m_placeTracker->GedtLapNumber();
+}
+
+std::size_t Car::GetPlace() const
+{
+	return m_placeTracker->GetPlace();
+}
+
 void Car::PrintData()
 {
+	std::cout << "==================================\n";
 	std::cout << m_engine->GetSpeedKmh() << " " << m_engine->GetCurrentGear() << std::endl;
+	std::cout << m_position << std::endl;
+	std::cout << "==================================\n";
 }
 
 void Car::UpdateOrientation(float deltaTime)
